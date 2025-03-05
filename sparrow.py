@@ -4,37 +4,49 @@
 
 import cv2 
 import numpy as np
+import queue
+import lines #local import
 
 class Screen:
   _instance = None 
   
-  def __new__(cls, width=500, height=500, bg_color=(255, 255, 255)):
+  def __new__(cls, width=500, height=500, bg_color=(255, 255, 255), colour=(0,0,0)):
     if cls._instance is None:
       cls._instance = super(Screen, cls).__new__(cls)
       cls._instance.width = width
       cls._instance.height = height
       cls._instance.bg_color = bg_color
+      cls._instance.colour = colour
+      cls._intance.buffer = queue.Queue()
       cls._instance.canvas = np.ones((height, width, 3),
         dtype=np.uint8) * np.array(bg_color, dtype=np.uint8)
     return cls._instance
   
   def show(self):
     cv2.imshow("Sparrow Screen", self.canvas)
-    cv2.waitKey(1)
+    key = cv2.waitKey(0)
+    if key == 27:
+      cv2.destroyAllWindows()
+      
     
   def clear(self):
     self.canvas[:] = self.bg_color
-    
+  
+  
   # def update(self):
-  #   cv2.imshow("Sparrow Screen", self.canvas)
-  #   cv2.waitKey(1)
+  #   for new_canvas in self.buffer:
+  #     self.canvas = cv2.bitwise_and(self.canvas, new_canvas)
+  
+  def update(self):
+    while not self.buffer.empty():
+      x,y,= self.buffer.get()
+      self.canvas[y,x] = self.color
     
-
 
 class Sparrow:
   def __init__(self):
     self.screen = Screen()
-    self.speed = 0
+    self.slowness = 0
     self.x, self.y = self.screen.width // 2, self.screen.height // 2
     self.color = (0,0,0)
     self.size = 1
@@ -50,33 +62,54 @@ class Sparrow:
   def goto(self, x, y):
     x,y = cartesian_2_screen((x,y))
     if self.pen:
-      cv2.line(self.screen.canvas, (self.x, self.y), (x, y),
-        self.color, self.size)
+      self.__drawline(x, y)
     self.x, self.y = x, y
-    self.screen.show()
+    # self.screen.show()
+  
+  def __drawline(self, *args):
+    if len(args) == 1:
+      distance = args[0]
+      new_x, new_y = new_coordinate((self.x, self.y), self.angle, distance)
+    elif len(args) == 2:
+      new_x, new_y = args
+    else:
+      raise ValueError('Invalid number of arguments')
     
+    if self.slowness == 0:  
+      self.screen.canvas = lines.bresenham_line((self.x, self.y), (new_x, new_y),
+        self.screen.canvas, self.color)
+    else:
+      self.screen.canvas = lines.bresenham_slowness((self.x, self.y), (new_x, new_y),
+        self.screen.canvas, self.color, self.slowness)
+    self.x = new_x
+    self.y = new_y
+    # self.screen.show()
+    
+  def __drawline_points(self, *args):
+    if len(args) == 1:
+      distance = args[0]
+      new_x, new_y = new_coordinate((self.x, self.y), self.angle, distance)
+    elif len(args) == 2:
+      new_x, new_y = args
+    else:
+      raise ValueError('Invalid number of arguments')
+    
+    point_generator = lines.bresenham_points((self.x, self.y), (new_x, new_y))
+    for point in point_generator:
+      self.screen.buffer.append(point)
+    self.x = new_x 
+    self.y = new_y
+    
+    
+  
   def forward(self, distance):
     '''move the sparrow forward by distance'''
-    new_x, new_y = new_coordinate((self.x, self.y), self.angle, distance)
-    if self.pen:
-      cv2.line(self.screen.canvas, (self.x, self.y), (new_x, new_y),
-        self.color, self.size)
-    self.x = new_x
-    self.y = new_y
-    self.screen.show()
-    
-    
+    self.__drawline(distance)
+  
   def backward(self, distance):
     '''move the sparrow backward by distance'''
-    new_x, new_y = new_coordinate((self.x, self.y), self.angle, -distance)
-    if self.pen:
-      cv2.line(self.screen.canvas, (self.x, self.y), (new_x, new_y),
-        self.color, self.size)
-      
-    self.x = new_x
-    self.y = new_y
-    self.screen.show()
-    
+    self.__drawline(-distance)
+  
   def left(self, angle):
     '''turn the sparrow left by angle'''
     self.angle += angle
@@ -113,7 +146,10 @@ class Sparrow:
     '''set the position of the sparrow'''
     self.x = x
     self.y = y
-
+    
+  def set_slowness(self, slowness):
+    '''set the slowness of the sparrow'''
+    self.slowness = slowness
     
 def new_coordinate(coord, angle, distance):
   '''return the new coordinate after moving distance in the angle direction'''
@@ -207,12 +243,14 @@ def test_directed_triangle():
 def main():
   wn = Screen()
   sparrow = Sparrow()
+  sparrow.set_slowness(1)
   sparrow.forward(100)
   sparrow.left(deg_2_rad(90))
   sparrow.forward(100)
   sparrow.set_color((255,0,0))
   sparrow.goto(0,0)
-  
+  # sparrow.screen.show()
+  wn.show()
   cv2.waitKey(0)
   cv2.destroyAllWindows()
 
