@@ -17,6 +17,7 @@ class Screen:
       cls._instance.height = height
       cls._instance.bg_color = bg_color
       cls._instance.colour = colour
+      cls._instance.slowness=0
       cls._intance.buffer = queue.Queue()
       cls._instance.canvas = np.ones((height, width, 3),
         dtype=np.uint8) * np.array(bg_color, dtype=np.uint8)
@@ -24,7 +25,7 @@ class Screen:
   
   def show(self):
     cv2.imshow("Sparrow Screen", self.canvas)
-    key = cv2.waitKey(0)
+    key = cv2.waitKey(1)
     if key == 27:
       cv2.destroyAllWindows()
       
@@ -40,7 +41,7 @@ class Screen:
   def update(self):
     while not self.buffer.empty():
       x,y,= self.buffer.get()
-      self.canvas[y,x] = self.color
+      self.canvas[y,x] = self.color #HACK: doesn't use sparrows colour, and probably slow
     
 
 class Sparrow:
@@ -96,7 +97,8 @@ class Sparrow:
     
     point_generator = lines.bresenham_points((self.x, self.y), (new_x, new_y))
     for point in point_generator:
-      self.screen.buffer.append(point)
+      self.screen.buffer.put(point)
+      
     self.x = new_x 
     self.y = new_y
     
