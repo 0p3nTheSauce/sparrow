@@ -45,9 +45,10 @@ class Screen:
   
   def update(self):
     while not self.buffer.empty():
-      x,y,= self.buffer.get()
-      self.canvas[y,x] = self.color #HACK: doesn't use sparrows colour, and probably slow
-  
+      x, y, color = self.buffer.get()
+      self.canvas[y, x] = color
+      self.show()  # Refresh after each point
+      
   def mainloop(self):
     while True:
       if not self.buffer.empty():
@@ -72,7 +73,7 @@ def update_screen(screen):
   while any(thread.is_alive() for thread in threading.enumerate() if thread != threading.main_thread()):
     screen.update()
     screen.show()
-    time.sleep(0.05)  # Adjust refresh rate
+    time.sleep(0.01)  # More frequent updates
 
   # Final update and display
   screen.update()
@@ -133,7 +134,8 @@ class Sparrow():
     
     point_generator = lines.bresenham_points((self.x, self.y), (new_x, new_y))
     for point in point_generator:
-      self.screen.buffer.put(point)
+        self.screen.buffer.put((point[0], point[1]))
+        time.sleep(0.001)  # Critical: Allows threads to interleave
       
     self.x = new_x 
     self.y = new_y
@@ -285,7 +287,7 @@ def triangle(sparrow, distance, pos):
       sparrow.right(deg_2_rad(120))
 
 def rand_triangle(sparrow,distance):
-  for _ in range(10):
+  for _ in range(100):
     sparrow.penup()
     rand_x = random.randint(-200,200)
     rand_y = random.randint(-200,200)
@@ -313,20 +315,37 @@ def test_parallel():
   wn = Screen()
   rock = Sparrow()
   petronia = Sparrow()
+  house = Sparrow()
+  eurasian_tree = Sparrow()
   
 
   
   thread1 = run_parallel(rand_triangle, rock, 50)
   thread2 = run_parallel(rand_triangle, petronia, 30)
+  thread3 = run_parallel(rand_triangle, house, 20)
+  thread4 = run_parallel(rand_triangle, eurasian_tree, 10)
   
   wn.mainloop()
   
   thread1.join()
   thread2.join()
+  thread3.join()
+  thread4.join()
+
+def test_big_triangle():
+  wn = Screen()
+  rock = Sparrow()
+  for i in range(3):
+    rock.forward(100)
+    rock.right(deg_2_rad(120))
+    
+  wn.mainloop()
+  
   
   
 def main():
-  test_parallel()
+  # test_parallel()
+  test_big_triangle()
 
 if __name__ == '__main__':
   main()
