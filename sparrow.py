@@ -7,6 +7,7 @@ import numpy as np
 import queue
 import threading
 import time
+import random
 import lines #local import
 
 
@@ -46,6 +47,19 @@ class Screen:
     while not self.buffer.empty():
       x,y,= self.buffer.get()
       self.canvas[y,x] = self.color #HACK: doesn't use sparrows colour, and probably slow
+  
+  def mainloop(self):
+    while True:
+      if not self.buffer.empty():
+        coord = self.buffer.get()
+        if coord is None:
+          break
+        x,y = coord
+        self.canvas[y,x] = self.colour#HACK doesn't use sparrows colour, and probably slow
+        self.show()
+      if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+  
     
 def run_parallel(task, sparrow, *args):
   '''run tasks in parallel'''
@@ -85,7 +99,7 @@ class Sparrow():
   def goto(self, x, y):
     x,y = cartesian_2_screen((x,y))
     if self.pen:
-      self.__drawline(x, y)
+      self.__drawline_points(x, y)
     self.x, self.y = x, y
     # self.screen.show()
   
@@ -126,11 +140,11 @@ class Sparrow():
     
   def forward(self, distance):
     '''move the sparrow forward by distance'''
-    self.__drawline(distance)
+    self.__drawline_points(distance)
   
   def backward(self, distance):
     '''move the sparrow backward by distance'''
-    self.__drawline(-distance)
+    self.__drawline_points(-distance)
   
   def left(self, angle):
     '''turn the sparrow left by angle'''
@@ -268,7 +282,18 @@ def triangle(sparrow, distance, pos):
   sparrow.pendown()
   for _ in range(3):
       sparrow.forward(distance)
-      sparrow.right(120)
+      sparrow.right(deg_2_rad(120))
+
+def rand_triangle(sparrow,distance):
+  for _ in range(10):
+    sparrow.penup()
+    rand_x = random.randint(-200,200)
+    rand_y = random.randint(-200,200)
+    sparrow.goto(rand_x,rand_y)
+    sparrow.pendown()
+    for _ in range(3):
+      sparrow.forward(distance)
+      sparrow.right(deg_2_rad(120))
 
 def test_basic():
   wn = Screen()
@@ -288,14 +313,17 @@ def test_parallel():
   wn = Screen()
   rock = Sparrow()
   petronia = Sparrow()
-  screen_thread = threading.Thread(target=update_screen, args=(wn,))
-  screen_thread.start()
-  thread1 = run_parallel(triangle, rock, 50, (100, 100))
-  thread2 = run_parallel(triangle, petronia, 30, (200, 200))
+  
+
+  
+  thread1 = run_parallel(rand_triangle, rock, 50)
+  thread2 = run_parallel(rand_triangle, petronia, 30)
+  
+  wn.mainloop()
   
   thread1.join()
   thread2.join()
-  screen_thread.join()  
+  
   
 def main():
   test_parallel()
