@@ -5,12 +5,16 @@
 import cv2 
 import numpy as np
 import queue
+import threading
+import time
 import lines #local import
+
+
 
 class Screen:
   _instance = None 
   
-  def __new__(cls, width=500, height=500, bg_color=(255, 255, 255), colour=(0,0,0)):
+  def __new__(cls, width=600, height=600, bg_color=(255, 255, 255), colour=(0,0,0)):
     if cls._instance is None:
       cls._instance = super(Screen, cls).__new__(cls)
       cls._instance.width = width
@@ -18,7 +22,7 @@ class Screen:
       cls._instance.bg_color = bg_color
       cls._instance.colour = colour
       cls._instance.slowness=0
-      cls._intance.buffer = queue.Queue()
+      cls._instance.buffer = queue.Queue()
       cls._instance.canvas = np.ones((height, width, 3),
         dtype=np.uint8) * np.array(bg_color, dtype=np.uint8)
     return cls._instance
@@ -43,11 +47,29 @@ class Screen:
       x,y,= self.buffer.get()
       self.canvas[y,x] = self.color #HACK: doesn't use sparrows colour, and probably slow
     
+def run_parallel(task, sparrow, *args):
+  '''run tasks in parallel'''
+  thread = threading.Thread(target=task, args=(sparrow, *args))
+  thread.start()
+  return thread
 
-class Sparrow:
+def update_screen(screen):
+  """Continuously updates and displays the screen while threads are active."""
+  while any(thread.is_alive() for thread in threading.enumerate() if thread != threading.main_thread()):
+    screen.update()
+    screen.show()
+    time.sleep(0.05)  # Adjust refresh rate
+
+  # Final update and display
+  screen.update()
+  screen.show()
+  cv2.waitKey(0)
+  cv2.destroyAllWindows()
+
+class Sparrow():
   def __init__(self):
     self.screen = Screen()
-    self.slowness = 0
+    self.slowness = 1
     self.x, self.y = self.screen.width // 2, self.screen.height // 2
     self.color = (0,0,0)
     self.size = 1
@@ -102,8 +124,6 @@ class Sparrow:
     self.x = new_x 
     self.y = new_y
     
-    
-  
   def forward(self, distance):
     '''move the sparrow forward by distance'''
     self.__drawline(distance)
@@ -242,7 +262,15 @@ def test_directed_triangle():
   cv2.waitKey(0)
   cv2.destroyAllWindows()
 
-def main():
+def triangle(sparrow, distance, pos):
+  sparrow.penup()
+  sparrow.goto(*pos)
+  sparrow.pendown()
+  for _ in range(3):
+      sparrow.forward(distance)
+      sparrow.right(120)
+
+def test_basic():
   wn = Screen()
   sparrow = Sparrow()
   sparrow.set_slowness(1)
@@ -255,6 +283,22 @@ def main():
   wn.show()
   cv2.waitKey(0)
   cv2.destroyAllWindows()
+  
+def test_parallel():
+  wn = Screen()
+  rock = Sparrow()
+  petronia = Sparrow()
+  screen_thread = threading.Thread(target=update_screen, args=(wn,))
+  screen_thread.start()
+  thread1 = run_parallel(triangle, rock, 50, (100, 100))
+  thread2 = run_parallel(triangle, petronia, 30, (200, 200))
+  
+  thread1.join()
+  thread2.join()
+  screen_thread.join()  
+  
+def main():
+  test_parallel()
 
 if __name__ == '__main__':
   main()
