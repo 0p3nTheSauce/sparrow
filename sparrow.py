@@ -81,7 +81,7 @@ class Sparrow():
   def __init__(self):
     self.screen = Screen()
     self.slowness = 1
-    self.x, self.y = self.screen.width // 2, self.screen.height // 2
+    self.x, self.y = 0,0
     self.color = (0,0,0)
     self.size = 1
     self.image = 'v^o>'
@@ -94,7 +94,6 @@ class Sparrow():
     self.screen.show()
     
   def goto(self, x, y, penup=False, drawline=False):
-    x,y = cartesian_2_screen((x,y))
     if not penup and self.pen:
       if drawline:
         self.drawline(x, y)
@@ -106,7 +105,8 @@ class Sparrow():
   def drawline(self, *args):
     if len(args) == 1:
       distance = args[0]
-      new_x, new_y = new_coordinate((self.x, self.y), self.angle, distance)
+      # new_x, new_y = new_coordinate((self.x, self.y), self.angle, distance)
+      new_x, new_y = self.__new_coordinate(distance)
     elif len(args) == 2:
       new_x, new_y = args
     else:
@@ -118,15 +118,15 @@ class Sparrow():
     else:
       self.screen.canvas = lines.bresenham_slowness((self.x, self.y), (new_x, new_y),
         self.screen.canvas, self.color, self.slowness)
-    self.x = new_x
-    self.y = new_y
+    # self.x = new_x
+    # self.y = new_y
     # self.screen.show()
     
   def __drawline_points(self, *args):
     '''used for parallel writing'''
     if len(args) == 1:
       distance = args[0]
-      new_x, new_y = new_coordinate((self.x, self.y), self.angle, distance)
+      new_x, new_y = self.__new_coordinate(distance)
     elif len(args) == 2:
       new_x, new_y = args
     else:
@@ -139,6 +139,14 @@ class Sparrow():
       
     self.x = new_x 
     self.y = new_y
+  
+  def __new_coordinate(self, distance):
+    '''return the new coordinate after moving distance in the angle direction'''
+    new_x = self.x + distance * np.cos(self.angle)
+    new_y = self.y + distance * np.sin(self.angle)
+    self.x = new_x
+    self.y = new_y
+    return cartesian_2_screen((new_x, new_y))    
     
   def forward(self, distance):
     '''move the sparrow forward by distance'''
@@ -187,14 +195,7 @@ class Sparrow():
     
   def set_slowness(self, slowness):
     '''set the slowness of the sparrow'''
-    self.slowness = slowness
-    
-def new_coordinate(coord, angle, distance):
-  '''return the new coordinate after moving distance in the angle direction'''
-  x,y = screen_2_cartesian(coord)
-  new_x = x + distance * np.cos(angle)
-  new_y = y + distance * np.sin(angle)
-  return cartesian_2_screen((new_x, new_y))    
+    self.slowness = slowness 
 
 def small_circle(coord,screen,colour=(0,0,0)):
   '''draw a small circle at x,y on the screen'''
@@ -217,6 +218,12 @@ def tup_2_np(tup):
 
 def directed_trianlge(coord,angle,screen,colour=(0,0,0),size=10):
   '''draw a small triangle at x,y on the screen'''
+  def new_coordinate(coord, angle, distance):
+    '''return the new coordinate after moving distance in the angle direction'''
+    x,y = screen_2_cartesian(coord)
+    new_x = x + distance * np.cos(angle)
+    new_y = y + distance * np.sin(angle)
+    return cartesian_2_screen((new_x, new_y))   
   x,y = coord
   '''
   a\\
