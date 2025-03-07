@@ -10,7 +10,8 @@ import time
 import random
 import lines #local import
 
-
+#Global variables for Sparrow
+HOME = (0,0)
 
 class Screen:
   _instance = None 
@@ -37,11 +38,6 @@ class Screen:
     
   def clear(self):
     self.canvas[:] = self.bg_color
-  
-  
-  # def update(self):
-  #   for new_canvas in self.buffer:
-  #     self.canvas = cv2.bitwise_and(self.canvas, new_canvas)
   
   def update(self):
     while not self.buffer.empty():
@@ -97,14 +93,14 @@ class Sparrow():
     self.screen.clear()
     self.screen.show()
     
-  def goto(self, x, y):
+  def goto(self, x, y, penup=False):
     x,y = cartesian_2_screen((x,y))
-    if self.pen:
+    if not penup and self.pen:
       self.__drawline_points(x, y)
     self.x, self.y = x, y
     # self.screen.show()
   
-  def __drawline(self, *args):
+  def drawline(self, *args):
     if len(args) == 1:
       distance = args[0]
       new_x, new_y = new_coordinate((self.x, self.y), self.angle, distance)
@@ -124,6 +120,7 @@ class Sparrow():
     # self.screen.show()
     
   def __drawline_points(self, *args):
+    '''used for parallel writing'''
     if len(args) == 1:
       distance = args[0]
       new_x, new_y = new_coordinate((self.x, self.y), self.angle, distance)
@@ -195,14 +192,6 @@ def new_coordinate(coord, angle, distance):
   new_x = x + distance * np.cos(angle)
   new_y = y + distance * np.sin(angle)
   return cartesian_2_screen((new_x, new_y))    
-    
-
-#first i need to remind myself how to use opencv, starting with creating a blank white image, with black lines in the diagonal
-def blank():
-  '''create a blank white image with a black diagonal line'''
-  blank = np.ones((600, 600,3)) * 255
-  #cv2.line(blank, (0,0), (600,600), (0,0,0), 3)
-  return blank
 
 def small_circle(coord,screen,colour=(0,0,0)):
   '''draw a small circle at x,y on the screen'''
@@ -268,10 +257,10 @@ def deg_2_rad(deg):
 
 
 def test_directed_triangle():
-  blank_ = blank()
+  blank = np.ones((600,600), np.int8)*255
   #spot = small_circle(300,300, blank)
   # cv2.imshow('blank', blank_)
-  tri = directed_trianlge((0,0), deg_2_rad(30), blank_)
+  tri = directed_trianlge((0,0), deg_2_rad(30), blank)
   
   # cv2.imshow('spot', spot)  
   cv2.imshow('tri', tri)
@@ -335,6 +324,14 @@ def test_parallel():
 def test_big_triangle():
   wn = Screen()
   rock = Sparrow()
+  rock.goto(100,100, penup=True)
+  for i in range(3):
+    rock.drawline(100)
+    rock.right(deg_2_rad(120))
+  # for i in range(3):
+  #   rock.forward(100)
+  #   rock.right(deg_2_rad(120))
+  rock.goto(*HOME, penup=True)
   for i in range(3):
     rock.forward(100)
     rock.right(deg_2_rad(120))
