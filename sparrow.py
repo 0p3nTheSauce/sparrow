@@ -93,10 +93,13 @@ class Sparrow():
     self.screen.clear()
     self.screen.show()
     
-  def goto(self, x, y, penup=False):
+  def goto(self, x, y, penup=False, drawline=False):
     x,y = cartesian_2_screen((x,y))
     if not penup and self.pen:
-      self.__drawline_points(x, y)
+      if drawline:
+        self.drawline(x, y)
+      else:
+        self.__drawline_points(x, y)
     self.x, self.y = x, y
     # self.screen.show()
   
@@ -321,21 +324,30 @@ def test_parallel():
   thread3.join()
   thread4.join()
 
+def better_triangle(sparrow, distance, pos=(0,0)):
+  sparrow.goto(*pos, penup=True)
+  sparrow.drawline(distance)
+  sparrow.right(deg_2_rad(120))
+  sparrow.drawline(distance)
+  sparrow.goto(*pos,drawline=True) 
+
+
 def test_big_triangle():
   wn = Screen()
   rock = Sparrow()
-  rock.goto(100,100, penup=True)
-  for i in range(3):
-    rock.drawline(100)
-    rock.right(deg_2_rad(120))
+  # rock.goto(100,100, penup=True)
+  # for i in range(3):
+  #   rock.drawline(100)
+  #   rock.right(deg_2_rad(120))
+  # # for i in range(3):
+  # #   rock.forward(100)
+  # #   rock.right(deg_2_rad(120))
+  # rock.goto(*HOME, penup=True)
   # for i in range(3):
   #   rock.forward(100)
   #   rock.right(deg_2_rad(120))
-  rock.goto(*HOME, penup=True)
-  for i in range(3):
-    rock.forward(100)
-    rock.right(deg_2_rad(120))
-    
+  better_triangle(rock, 100)
+  
   wn.mainloop()
   
   
