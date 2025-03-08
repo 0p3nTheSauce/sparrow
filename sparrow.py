@@ -16,7 +16,7 @@ HOME = (0,0)
 class Screen:
   _instance = None 
   
-  def __new__(cls, width=600, height=600, bg_color=(255, 255, 255), colour=(0,0,0)):
+  def __new__(cls, width=799, height=799, bg_color=(255, 255, 255), colour=(0,0,0)):
     if cls._instance is None:
       cls._instance = super(Screen, cls).__new__(cls)
       cls._instance.width = width
@@ -51,7 +51,7 @@ class Screen:
         coord = self.buffer.get()
         if coord is None:
           break
-        x,y = coord
+        x,y = cartesian_2_screen(coord)
         self.canvas[y,x] = self.colour#HACK doesn't use sparrows colour, and probably slow
         self.show()
       if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -103,20 +103,22 @@ class Sparrow():
     # self.screen.show()
   
   def drawline(self, *args):
+    curr_x, curr_y = cartesian_2_screen((self.x, self.y))
     if len(args) == 1:
       distance = args[0]
       # new_x, new_y = new_coordinate((self.x, self.y), self.angle, distance)
-      new_x, new_y = self.__new_coordinate(distance)
+      new_x, new_y = cartesian_2_screen(self.__new_coordinate(distance))
     elif len(args) == 2:
-      new_x, new_y = args
+      new_x, new_y = cartesian_2_screen(args)
+      self.x, self.y = args
     else:
       raise ValueError('Invalid number of arguments')
     
     if self.slowness == 0:  
-      self.screen.canvas = lines.bresenham_line((self.x, self.y), (new_x, new_y),
+      self.screen.canvas = lines.bresenham_line((curr_x, curr_y), (new_x, new_y),
         self.screen.canvas, self.color)
     else:
-      self.screen.canvas = lines.bresenham_slowness((self.x, self.y), (new_x, new_y),
+      self.screen.canvas = lines.bresenham_slowness((curr_x, curr_y), (new_x, new_y),
         self.screen.canvas, self.color, self.slowness)
     # self.x = new_x
     # self.y = new_y
@@ -124,21 +126,21 @@ class Sparrow():
     
   def __drawline_points(self, *args):
     '''used for parallel writing'''
+    curr_x, curr_y = cartesian_2_screen((self.x, self.y))
     if len(args) == 1:
       distance = args[0]
-      new_x, new_y = self.__new_coordinate(distance)
+      new_x, new_y = cartesian_2_screen(self.__new_coordinate(distance))
     elif len(args) == 2:
-      new_x, new_y = args
+      new_x, new_y = cartesian_2_screen(args)
+      self.x, self.y = args
     else:
       raise ValueError('Invalid number of arguments')
     
-    point_generator = lines.bresenham_points((self.x, self.y), (new_x, new_y))
+    point_generator = lines.bresenham_points((curr_x, curr_y), (new_x, new_y))
     for point in point_generator:
         self.screen.buffer.put((point[0], point[1]))
         time.sleep(0.001)  # Critical: Allows threads to interleave
-      
-    self.x = new_x 
-    self.y = new_y
+    
   
   def __new_coordinate(self, distance):
     '''return the new coordinate after moving distance in the angle direction'''
@@ -146,7 +148,7 @@ class Sparrow():
     new_y = self.y + distance * np.sin(self.angle)
     self.x = new_x
     self.y = new_y
-    return cartesian_2_screen((new_x, new_y))    
+    return (new_x, new_y)
     
   def forward(self, distance):
     '''move the sparrow forward by distance'''
@@ -277,13 +279,6 @@ def test_directed_triangle():
   cv2.waitKey(0)
   cv2.destroyAllWindows()
 
-def triangle(sparrow, distance, pos):
-  sparrow.penup()
-  sparrow.goto(*pos)
-  sparrow.pendown()
-  for _ in range(3):
-      sparrow.forward(distance)
-      sparrow.right(deg_2_rad(120))
 
 def rand_triangle(sparrow,distance):
   for _ in range(100):
@@ -338,6 +333,13 @@ def better_triangle(sparrow, distance, pos=(0,0)):
   sparrow.drawline(distance)
   sparrow.goto(*pos,drawline=True) 
 
+def triangle(sparrow, distance, pos):
+  # sparrow.penup()
+  # sparrow.goto(*pos)
+  # sparrow.pendown()
+  for _ in range(3):
+      sparrow.forward(distance)
+      sparrow.right(deg_2_rad(120))
 
 def test_big_triangle():
   wn = Screen()
@@ -353,7 +355,9 @@ def test_big_triangle():
   # for i in range(3):
   #   rock.forward(100)
   #   rock.right(deg_2_rad(120))
-  better_triangle(rock, 100)
+  # better_triangle(rock, 100)
+  
+  triangle(rock, 100, (100,100))
   
   wn.mainloop()
   
@@ -362,6 +366,7 @@ def test_big_triangle():
 def main():
   # test_parallel()
   test_big_triangle()
+  
 
 if __name__ == '__main__':
   main()
