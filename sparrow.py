@@ -48,10 +48,10 @@ class Screen:
   def mainloop(self):
     while True:
       if not self.buffer.empty():
-        coord = self.buffer.get()
+        coord = self.buffer.get() #coord coming in screen coordinates
         if coord is None:
           break
-        x,y = cartesian_2_screen(coord)
+        x,y = coord
         self.canvas[y,x] = self.colour#HACK doesn't use sparrows colour, and probably slow
         self.show()
       if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -338,8 +338,8 @@ def triangle(sparrow, distance, pos):
   # sparrow.goto(*pos)
   # sparrow.pendown()
   for _ in range(3):
-      sparrow.forward(distance)
-      sparrow.right(deg_2_rad(120))
+    sparrow.drawline(distance)
+    sparrow.right(deg_2_rad(120))
 
 def test_big_triangle():
   wn = Screen()
