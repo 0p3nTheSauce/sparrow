@@ -117,12 +117,13 @@ class Sparrow():
     if self.slowness == 0:  
       self.screen.canvas = lines.bresenham_line((curr_x, curr_y), (new_x, new_y),
         self.screen.canvas, self.color)
+      self.screen.show()
     else:
       self.screen.canvas = lines.bresenham_slowness((curr_x, curr_y), (new_x, new_y),
         self.screen.canvas, self.color, self.slowness)
     # self.x = new_x
     # self.y = new_y
-    # self.screen.show()
+    
     
   def __drawline_points(self, *args):
     '''used for parallel writing'''
@@ -279,18 +280,6 @@ def test_directed_triangle():
   cv2.waitKey(0)
   cv2.destroyAllWindows()
 
-
-def rand_triangle(sparrow,distance):
-  for _ in range(100):
-    sparrow.penup()
-    rand_x = random.randint(-200,200)
-    rand_y = random.randint(-200,200)
-    sparrow.goto(rand_x,rand_y)
-    sparrow.pendown()
-    for _ in range(3):
-      sparrow.forward(distance)
-      sparrow.right(deg_2_rad(120))
-
 def test_basic():
   wn = Screen()
   sparrow = Sparrow()
@@ -361,11 +350,28 @@ def test_big_triangle():
   
   wn.mainloop()
   
-  
+def rand_triangle(sparrow,distance):
+  for _ in range(100):
+    sparrow.penup()
+    rand_x = random.randint(-200,200)
+    rand_y = random.randint(-200,200)
+    sparrow.goto(rand_x,rand_y)
+    sparrow.pendown()
+    for _ in range(3):
+      sparrow.drawline(distance)
+      sparrow.right(deg_2_rad(120))
+
+def test_more_triangles():
+  wn = Screen()
+  rock = Sparrow()
+  rock.set_slowness(0)
+  rand_triangle(rock, 100)
+  wn.mainloop()
   
 def main():
-  # test_parallel()
-  test_big_triangle()
+  #test_parallel()
+  #test_big_triangle()
+  test_more_triangles()
   
 
 if __name__ == '__main__':
