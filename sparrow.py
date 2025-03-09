@@ -142,12 +142,7 @@ class Sparrow():
     '''return the new coordinate after moving distance in the angle direction'''
     new_x = self.x + distance * np.cos(self.angle)
     new_y = self.y + distance * np.sin(self.angle)
-    if new_x >= self.x_max or new_x < self.x_min or new_y >= self.y_max or new_y < self.y_min:
-      try:
-        raise ValueError(f"Sparrow flew over the edge of the earth: ({new_x},{new_y})") 
-      except ValueError as e:
-        print(f"Error in thread: {e}")
-        sys.exit(1)  # Exit the entire program
+    # new_x, new_y = self.__portal(new_x, new_y)  
     self.x = new_x
     self.y = new_y
     return (new_x, new_y)
@@ -263,10 +258,19 @@ def directed_trianlge(coord,angle,screen,colour=(0,0,0),size=10):
   cv2.fillPoly(screen, [points], colour)
   return screen
 
-def cartesian_2_screen(coord):
+def cartesian_2_screen(coord, screen_size=(799,799)):
   '''convert the cartesian coordinates to screen coordinates'''
   x,y = coord
-  return (round(x+300), round(300-y))
+  x,y = round(x+300), round(300-y)
+  if x < 0:
+    x = 0
+  elif x >= screen_size[0]:
+    x = screen_size[0]-1
+  if y < 0:
+    y = 0
+  elif y >= screen_size[1]:
+    y = screen_size[1]-1
+  return (x,y)
 
 def screen_2_cartesian(coord):
   '''convert the screen coordinates to cartesian coordinates'''
