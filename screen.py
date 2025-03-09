@@ -18,9 +18,9 @@ class Screen:
         dtype=np.uint8) * np.array(bg_color, dtype=np.uint8)
     return cls._instance
   
-  def show(self):
+  def show(self,wait=1):
     cv2.imshow("Sparrow Screen", self.canvas)
-    key = cv2.waitKey(1)
+    key = cv2.waitKey(wait)
     if key == 27:
       cv2.destroyAllWindows()
       
@@ -28,12 +28,17 @@ class Screen:
   def clear(self):
     self.canvas[:] = self.bg_color
   
-  def update(self):
-    # while not self.buffer.empty():
-    #   x, y, color = self.buffer.get()
-    #   self.canvas[y, x] = color
-    #   self.show()  # Refresh after each point
-    self.chunks_update()
+  def seq_update(self):
+    while True:
+      if not self.buffer.empty():
+        coord = self.buffer.get() #coord coming in screen coordinates
+        if coord is None:
+          break
+        x,y = coord
+        self.canvas[y,x] = self.colour#HACK doesn't use sparrows colour, and probably slow
+        self.show()
+      if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
       
   def chunks_update(self, chunk_size=10):
     while not self.buffer.empty():
@@ -51,15 +56,10 @@ class Screen:
       #   self.canvas[y, x] = (0,0,0)
       self.show()
       
-  def mainloop(self):
-    # while True:
-    #   if not self.buffer.empty():
-    #     coord = self.buffer.get() #coord coming in screen coordinates
-    #     if coord is None:
-    #       break
-    #     x,y = coord
-    #     self.canvas[y,x] = self.colour#HACK doesn't use sparrows colour, and probably slow
-    #     self.show()
-    #   if cv2.waitKey(1) & 0xFF == ord('q'):
-    #     break
-    self.chunks_update()
+  def mainloop(self,drawline=False):
+    if drawline:
+      self.seq_update()
+    else: 
+      self.chunks_update()
+    self.show(1)
+    

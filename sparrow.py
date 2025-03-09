@@ -22,12 +22,12 @@ def run_parallel(task, sparrow, *args):
   thread.start()
   return thread
 
-def update_screen(screen):
-  """Continuously updates and displays the screen while threads are active."""
-  while any(thread.is_alive() for thread in threading.enumerate() if thread != threading.main_thread()):
-    screen.update()
-    screen.show()
-    time.sleep(0.001)  # More frequent updates
+# def update_screen(screen):
+#   """Continuously updates and displays the screen while threads are active."""
+#   while any(thread.is_alive() for thread in threading.enumerate() if thread != threading.main_thread()):
+#     screen.update()
+#     screen.show()
+#     time.sleep(0.001)  # More frequent updates
 
   # Final update and display
   screen.update()
@@ -109,9 +109,13 @@ class Sparrow():
     self.y = new_y
     return (new_x, new_y)
     
-  def forward(self, distance):
+  def forward(self, distance,drawline=False):
     '''move the sparrow forward by distance'''
-    self.__drawline_points(distance)
+    if drawline:
+      self.drawline(distance)
+    else:
+      self.__drawline_points(distance)
+    # self.__drawline_points(distance)
   
   def backward(self, distance):
     '''move the sparrow backward by distance'''
@@ -225,20 +229,9 @@ def screen_2_cartesian(coord):
 def deg_2_rad(deg):
   '''convert degrees to radians'''
   return deg * np.pi / 180
-
-
-def test_directed_triangle():
-  blank = np.ones((600,600), np.int8)*255
-  #spot = small_circle(300,300, blank)
-  # cv2.imshow('blank', blank_)
-  tri = directed_trianlge((0,0), deg_2_rad(30), blank)
   
-  # cv2.imshow('spot', spot)  
-  cv2.imshow('tri', tri)
-  cv2.waitKey(0)
-  cv2.destroyAllWindows()
-
-def test_basic():
+def main():
+  print('Hello Sparrow')
   wn = Screen()
   sparrow = Sparrow()
   sparrow.set_slowness(1)
@@ -247,100 +240,7 @@ def test_basic():
   sparrow.forward(100)
   sparrow.set_color((255,0,0))
   sparrow.goto(0,0)
-  # sparrow.screen.show()
-  wn.show()
-  cv2.waitKey(0)
-  cv2.destroyAllWindows()
-  
-def test_parallel():
-  wn = Screen()
-  rock = Sparrow()
-  petronia = Sparrow()
-  house = Sparrow()
-  eurasian_tree = Sparrow()
-  flock = [rock, petronia, house, eurasian_tree]
-  for sparrow in flock:
-    sparrow.set_slowness(0)
-    # sparrow.set_color((random.randint(0,255),random.randint(0,255),random.randint(0,255)))
-  
-
-  
-  thread1 = run_parallel(rand_triangle, rock, 50)
-  thread2 = run_parallel(rand_triangle, petronia, 30)
-  thread3 = run_parallel(rand_triangle, house, 20)
-  thread4 = run_parallel(rand_triangle, eurasian_tree, 10)
-  
   wn.mainloop()
-  
-  thread1.join()
-  thread2.join()
-  thread3.join()
-  thread4.join()
-
-def better_triangle(sparrow, distance, pos=(0,0)):
-  sparrow.goto(*pos, penup=True)
-  sparrow.drawline(distance)
-  sparrow.right(deg_2_rad(120))
-  sparrow.drawline(distance)
-  sparrow.goto(*pos,drawline=True) 
-
-def triangle(sparrow, distance, pos):
-  # sparrow.penup()
-  # sparrow.goto(*pos)
-  # sparrow.pendown()
-  for _ in range(3):
-    sparrow.drawline(distance)
-    sparrow.right(deg_2_rad(120))
-
-def test_big_triangle():
-  wn = Screen()
-  rock = Sparrow()
-  # rock.goto(100,100, penup=True)
-  # for i in range(3):
-  #   rock.drawline(100)
-  #   rock.right(deg_2_rad(120))
-  # # for i in range(3):
-  # #   rock.forward(100)
-  # #   rock.right(deg_2_rad(120))
-  # rock.goto(*HOME, penup=True)
-  # for i in range(3):
-  #   rock.forward(100)
-  #   rock.right(deg_2_rad(120))
-  # better_triangle(rock, 100)
-  
-  triangle(rock, 100, (100,100))
-  
-  wn.mainloop()
-  
-def rand_triangle(sparrow,distance):
-  for _ in range(20):
-    sparrow.penup()
-    rand_x = random.randint(-200,200)
-    rand_y = random.randint(-200,200)
-    sparrow.goto(rand_x,rand_y)
-    sparrow.pendown()
-    point_up = random.choice([True, False])
-    if point_up:
-      for _ in range(3):
-        sparrow.forward(distance)
-        sparrow.left(deg_2_rad(120))
-    else:
-      for _ in range(3):
-        sparrow.forward(distance)
-        sparrow.right(deg_2_rad(120))
-
-def test_more_triangles():
-  wn = Screen()
-  rock = Sparrow()
-  # rock.set_slowness(0)
-
-  rand_triangle(rock, 100)
-  wn.mainloop()
-  
-def main():
-  test_parallel()
-  #test_big_triangle()
-  #test_more_triangles()
   
 
 if __name__ == '__main__':
