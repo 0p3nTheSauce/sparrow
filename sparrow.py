@@ -4,58 +4,16 @@
 
 import cv2 
 import numpy as np
-import queue
 import threading
 import time
 import random
 import lines #local import
+from screen import Screen
 
 #Global variables for Sparrow
 HOME = (0,0)
 
-class Screen:
-  _instance = None 
-  
-  def __new__(cls, width=799, height=799, bg_color=(255, 255, 255), colour=(0,0,0)):
-    if cls._instance is None:
-      cls._instance = super(Screen, cls).__new__(cls)
-      cls._instance.width = width
-      cls._instance.height = height
-      cls._instance.bg_color = bg_color
-      cls._instance.colour = colour
-      cls._instance.slowness=0
-      cls._instance.buffer = queue.Queue()
-      cls._instance.canvas = np.ones((height, width, 3),
-        dtype=np.uint8) * np.array(bg_color, dtype=np.uint8)
-    return cls._instance
-  
-  def show(self):
-    cv2.imshow("Sparrow Screen", self.canvas)
-    key = cv2.waitKey(1)
-    if key == 27:
-      cv2.destroyAllWindows()
-      
-    
-  def clear(self):
-    self.canvas[:] = self.bg_color
-  
-  def update(self):
-    while not self.buffer.empty():
-      x, y, color = self.buffer.get()
-      self.canvas[y, x] = color
-      self.show()  # Refresh after each point
-      
-  def mainloop(self):
-    while True:
-      if not self.buffer.empty():
-        coord = self.buffer.get() #coord coming in screen coordinates
-        if coord is None:
-          break
-        x,y = coord
-        self.canvas[y,x] = self.colour#HACK doesn't use sparrows colour, and probably slow
-        self.show()
-      if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+
   
     
 def run_parallel(task, sparrow, *args):
@@ -69,7 +27,7 @@ def update_screen(screen):
   while any(thread.is_alive() for thread in threading.enumerate() if thread != threading.main_thread()):
     screen.update()
     screen.show()
-    time.sleep(0.00000000001)  # More frequent updates
+    time.sleep(0.001)  # More frequent updates
 
   # Final update and display
   screen.update()
