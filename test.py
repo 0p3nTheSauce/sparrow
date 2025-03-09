@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 import random
-from sparrow import Sparrow, run_parallel, directed_trianlge, deg_2_rad
+from sparrow import Sparrow, run_parallel, directed_trianlge, deg_2_rad, screen_2_cartesian
 from screen import Screen
 import time
 
@@ -31,19 +31,25 @@ def test_basic():
   cv2.destroyAllWindows()
   
 def test_parallel():
+  start_time = time.perf_counter()
   wn = Screen()
   rock = Sparrow()
   petronia = Sparrow()
   house = Sparrow()
   eurasian_tree = Sparrow()
-    
-  thread1 = run_parallel(rand_triangle, rock, 50)
-  thread2 = run_parallel(rand_triangle, petronia, 30)
-  thread3 = run_parallel(rand_triangle, house, 20)
-  thread4 = run_parallel(rand_triangle, eurasian_tree, 10)
+  # thread1 = run_parallel(rand_triangle, rock, 100)
+  # thread2 = run_parallel(rand_triangle, petronia, 100)
+  # thread3 = run_parallel(rand_triangle, house, 100)
+  # thread4 = run_parallel(rand_triangle, eurasian_tree, 100)
+  thread1 = run_parallel(swim_randomly, rock, 10)
+  thread2 = run_parallel(swim_randomly, petronia, 10)
+  thread3 = run_parallel(swim_randomly, house, 10)
+  thread4 = run_parallel(swim_randomly, eurasian_tree, 10)
+  
   
   wn.mainloop()
-  
+  end_time = time.perf_counter()
+  print(f"Time taken: {end_time-start_time} seconds")
   thread1.join()
   thread2.join()
   thread3.join()
@@ -103,13 +109,58 @@ def benchmark(func):
   func()
   end_time = time.perf_counter()
   print(f"Time taken: {end_time-start_time} seconds")
-    
+
+def swim_randomly(sparrow, distance):
+  for _ in range(100):
+    for _ in range(100):
+      dir = random.randint(-360,360)
+      sparrow.left(deg_2_rad(dir))
+      sparrow.forward(distance)
+      
+def cross_y_borders_left():
+  wn = Screen()
+  rock = Sparrow()
+  # rock.set_slowness(1)
+  # rock.right(deg_2_rad(90))
+  fsx,fsy = screen_2_cartesian((0,0))
+  rock.goto(fsx,fsy,penup=True)
+  print("got passed goto")
+  # for _ in range(798):
+  #   rock.forward(1, drawline=True)
+  # print("succeeded")
+  rock.left(deg_2_rad(90))
+  for _ in range(798):
+    rock.forward(1, drawline=True)  
+  
+
+def cross_y_borders_right():
+  wn = Screen()
+  rock = Sparrow()
+  # rock.set_slowness(1)
+  # rock.right(deg_2_rad(90))
+  fsx,fsy = screen_2_cartesian((0,798))
+  rock.goto(fsx,fsy,penup=True)
+  print("got passed goto")
+  # for _ in range(798):
+  #   rock.forward(1, drawline=True)
+  # print("succeeded")
+  rock.right(deg_2_rad(90))
+  for _ in range(798):
+    rock.forward(1, drawline=True)  
+  # wn.mainloop()
+  # rock.goto()
+
+
+
 def main():
   #test_parallel()
   #test_big_triangle()
   #test_more_triangles()
-  # benchmark(test_parallel)
-  benchmark(test_more_triangles)
+  #benchmark(test_parallel)
+  
+  # benchmark(test_more_triangles)
+  cross_y_borders_left()
+  #cross_y_borders_right()
   
 if __name__ == '__main__':
   main()

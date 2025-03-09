@@ -40,7 +40,7 @@ class Screen:
       if cv2.waitKey(1) & 0xFF == ord('q'):
         break
       
-  def chunks_update(self, chunk_size=10):
+  def chunks_update(self, chunk_size=100):
     while not self.buffer.empty():
       chunk = []
       for _ in range(chunk_size):
@@ -58,8 +58,9 @@ class Screen:
       
   def mainloop(self,drawline=False):
     if drawline:
-      self.seq_update()
+      # self.seq_update()
+      self.show(0)
     else: 
       self.chunks_update()
-    self.show(1)
+      self.show(0)
     

@@ -158,6 +158,10 @@ class Sparrow():
     self.x = x
     self.y = y
     
+  def get_position(self):
+    '''return the position of the sparrow''' 
+    return (self.x, self.y)
+    
   def set_slowness(self, slowness):
     '''set the slowness of the sparrow'''
     self.slowness = slowness 
