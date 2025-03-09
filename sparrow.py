@@ -9,6 +9,7 @@ import time
 import random
 import lines #local import
 from screen import Screen
+import sys
 
 #Global variables for Sparrow
 HOME = (0,0)
@@ -106,35 +107,49 @@ class Sparrow():
         time.sleep(0.001)  # Critical: Allows threads to interleave
     
   
+  # def __new_coordinate(self, distance):
+  #   '''return the new coordinate after moving distance in the angle direction'''
+  #   new_x = self.x + distance * np.cos(self.angle)
+  #   new_y = self.y + distance * np.sin(self.angle)
+  #   if self.portal:
+  #     #if sparrow crosses the screen edge, start from the opposite 
+  #     #edge of the screen
+  #     if new_x >= self.x_max:
+  #       new_x = self.x_min + ((new_x-self.max) % self.x_max*2)
+  #     elif new_x <= self.x_min:
+  #       new_x = self.x_max - ((self.x_min-new_x) % self.x_max*2)
+  #     if new_y >= self.y_max:
+  #       new_y = self.y_min + ((new_y-self.max) % self.y_max*2)
+  #     elif new_y <= self.y_min:
+  #       new_y = self.y_max - ((self.y_min-new_y) % self.y_max*2)
+  #     self.x = new_x
+  #     self.y = new_y
+  #   else:  
+  #     #update coordinates as normal, but return max coordinayes
+  #     self.x = new_x
+  #     self.y = new_y
+  #     if new_x >= self.x_max:
+  #       new_x = self.x_max
+  #     elif new_x <= self.x_min:
+  #       new_x = self.x_min
+  #     if new_y >= self.y_max:
+  #       new_y = self.y_max
+  #     elif new_y <= self.y_min:
+  #       new_y = self.y_min 
+  #   return (new_x, new_y)
+  
   def __new_coordinate(self, distance):
     '''return the new coordinate after moving distance in the angle direction'''
     new_x = self.x + distance * np.cos(self.angle)
     new_y = self.y + distance * np.sin(self.angle)
-    if self.portal:
-      #if sparrow crosses the screen edge, start from the opposite 
-      #edge of the screen
-      if new_x >= self.x_max:
-        new_x = self.x_min + ((new_x-self.max) % self.x_max*2)
-      elif new_x <= self.x_min:
-        new_x = self.x_max - ((self.x_min-new_x) % self.x_max*2)
-      if new_y >= self.y_max:
-        new_y = self.y_min + ((new_y-self.max) % self.y_max*2)
-      elif new_y <= self.y_min:
-        new_y = self.y_max - ((self.y_min-new_y) % self.y_max*2)
-      self.x = new_x
-      self.y = new_y
-    else:  
-      #update coordinates as normal, but return max coordinayes
-      self.x = new_x
-      self.y = new_y
-      if new_x >= self.x_max:
-        new_x = self.x_max
-      elif new_x <= self.x_min:
-        new_x = self.x_min
-      if new_y >= self.y_max:
-        new_y = self.y_max
-      elif new_y <= self.y_min:
-        new_y = self.y_min 
+    if new_x >= self.x_max or new_x < self.x_min or new_y >= self.y_max or new_y < self.y_min:
+      try:
+        raise ValueError(f"Sparrow flew over the edge of the earth: ({new_x},{new_y})") 
+      except ValueError as e:
+        print(f"Error in thread: {e}")
+        sys.exit(1)  # Exit the entire program
+    self.x = new_x
+    self.y = new_y
     return (new_x, new_y)
     
   def forward(self, distance,drawline=False):
