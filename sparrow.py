@@ -69,7 +69,7 @@ def update_screen(screen):
   while any(thread.is_alive() for thread in threading.enumerate() if thread != threading.main_thread()):
     screen.update()
     screen.show()
-    time.sleep(0.01)  # More frequent updates
+    time.sleep(0.00000000001)  # More frequent updates
 
   # Final update and display
   screen.update()
@@ -300,6 +300,10 @@ def test_parallel():
   petronia = Sparrow()
   house = Sparrow()
   eurasian_tree = Sparrow()
+  flock = [rock, petronia, house, eurasian_tree]
+  for sparrow in flock:
+    sparrow.set_slowness(0)
+    # sparrow.set_color((random.randint(0,255),random.randint(0,255),random.randint(0,255)))
   
 
   
@@ -351,27 +355,34 @@ def test_big_triangle():
   wn.mainloop()
   
 def rand_triangle(sparrow,distance):
-  for _ in range(5):
+  for _ in range(20):
     sparrow.penup()
     rand_x = random.randint(-200,200)
     rand_y = random.randint(-200,200)
     sparrow.goto(rand_x,rand_y)
     sparrow.pendown()
-    for _ in range(3):
-      sparrow.drawline(distance)
-      sparrow.right(deg_2_rad(120))
+    point_up = random.choice([True, False])
+    if point_up:
+      for _ in range(3):
+        sparrow.forward(distance)
+        sparrow.left(deg_2_rad(120))
+    else:
+      for _ in range(3):
+        sparrow.forward(distance)
+        sparrow.right(deg_2_rad(120))
 
 def test_more_triangles():
   wn = Screen()
   rock = Sparrow()
   # rock.set_slowness(0)
+
   rand_triangle(rock, 100)
   wn.mainloop()
   
 def main():
-  #test_parallel()
+  test_parallel()
   #test_big_triangle()
-  test_more_triangles()
+  #test_more_triangles()
   
 
 if __name__ == '__main__':
