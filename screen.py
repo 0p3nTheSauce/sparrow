@@ -28,6 +28,11 @@ class Screen:
   def clear(self):
     self.canvas[:] = self.bg_color
   
+  def on_screen(self,new_coords):
+    '''return True if the coordinates are on the screen'''
+    x,y = new_coords    
+    return 0 <= x < self.width and 0 <= y < self.height
+  
   def seq_update(self):
     while True:
       if not self.buffer.empty():
@@ -35,20 +40,24 @@ class Screen:
         if coord is None:
           break
         x,y,colour = coord
-        self.canvas[y,x] = colour
+        if self.on_screen((x,y)):
+          self.canvas[y,x] = colour
         self.show()
       if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-      
+  
   def chunks_update(self, chunk_size=100):
-    while not self.buffer.empty():
+    while True:
       chunk = []
       for _ in range(chunk_size):
         try:
           x, y, colour = self.buffer.get_nowait()
-          chunk.append((x, y, colour))
+          if self.on_screen((x,y)):
+            chunk.append((x, y, colour))
         except queue.Empty:
           break
+      if not chunk:
+        break
       x_coords = np.array([item[0] for item in chunk])
       y_coords = np.array([item[1] for item in chunk])
       colours = np.array([item[2] for item in chunk])

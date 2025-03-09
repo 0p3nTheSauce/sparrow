@@ -39,10 +39,6 @@ def run_parallel(task, sparrow, *args):
 class Sparrow():
   def __init__(self):
     self.screen = Screen()
-    self.x_min = -self.screen.width//2
-    self.x_max = self.screen.width//2
-    self.y_min = -self.screen.height//2
-    self.y_max = self.screen.height//2
     self.slowness = 1
     self.x, self.y = 0,0
     self.colour = (0,0,0)
@@ -65,12 +61,6 @@ class Sparrow():
         self.__drawline_points(x, y)
     self.x, self.y = x, y
     # self.screen.show()
-  
-  def on_screen(self, new_coords):
-    '''return True if the coordinates are on the screen'''
-    x,y = new_coords    
-    return self.x_min <= x < self.x_max and self.y_min <= y < self.y_max
-      
     
   def drawline(self, *args):
     curr_x, curr_y = cartesian_2_screen((self.x, self.y))
@@ -83,19 +73,15 @@ class Sparrow():
       self.x, self.y = args
     else:
       raise ValueError('Invalid number of arguments')
-    new_x, new_y = cartesian_2_screen(new_x, new_y)
-    if not self.on_screen((new_x, new_y)):    
-      colour = (255,255,255)
-    else:
-      colour = self.colour
+    new_x, new_y = cartesian_2_screen((new_x, new_y))
     
     if self.slowness == 0:  
       self.screen.canvas = lines.bresenham_line((curr_x, curr_y), (new_x, new_y),
-        self.screen.canvas, colour)
+        self.screen.canvas, self.colour)
       self.screen.show()
     else:
       self.screen.canvas = lines.bresenham_slowness((curr_x, curr_y), (new_x, new_y),
-        self.screen.canvas, colour, self.slowness)
+        self.screen.canvas, self.colour, self.slowness)
     
   def __drawline_points(self, *args):
     '''used for parallel writing'''
@@ -108,15 +94,12 @@ class Sparrow():
       self.x, self.y = args
     else:
       raise ValueError('Invalid number of arguments')
-    new_x, new_y = cartesian_2_screen(new_x, new_y)
-    if not self.on_screen((new_x, new_y)):
-      colour = (255,255,255)
-    else:
-      colour = self.colour
+    new_x, new_y = cartesian_2_screen((new_x, new_y))
     
-    point_generator = lines.bresenham_points((curr_x, curr_y), (new_x, new_y), colour)
+    
+    point_generator = lines.bresenham_points((curr_x, curr_y), (new_x, new_y), self.colour)
     for point in point_generator:
-        self.screen.buffer.put((point[0], point[1]), point[2])
+        self.screen.buffer.put((point[0], point[1], point[2]))
         time.sleep(0.001)  # Critical: Allows threads to interleave
         
         
