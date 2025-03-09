@@ -257,7 +257,7 @@ def directed_trianlge(coord,angle,screen,colour=(0,0,0),size=10):
 def cartesian_2_screen(coord):
   '''convert the cartesian coordinates to screen coordinates'''
   x,y = coord
-  return (int(x+300), int(300-y))
+  return (round(x+300), round(300-y))
 
 def screen_2_cartesian(coord):
   '''convert the screen coordinates to cartesian coordinates'''
@@ -351,7 +351,7 @@ def test_big_triangle():
   wn.mainloop()
   
 def rand_triangle(sparrow,distance):
-  for _ in range(100):
+  for _ in range(5):
     sparrow.penup()
     rand_x = random.randint(-200,200)
     rand_y = random.randint(-200,200)
@@ -364,7 +364,7 @@ def rand_triangle(sparrow,distance):
 def test_more_triangles():
   wn = Screen()
   rock = Sparrow()
-  rock.set_slowness(0)
+  # rock.set_slowness(0)
   rand_triangle(rock, 100)
   wn.mainloop()
   
