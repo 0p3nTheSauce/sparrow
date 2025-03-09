@@ -34,8 +34,8 @@ class Screen:
         coord = self.buffer.get() #coord coming in screen coordinates
         if coord is None:
           break
-        x,y = coord
-        self.canvas[y,x] = self.colour#HACK doesn't use sparrows colour, and probably slow
+        x,y,colour = coord
+        self.canvas[y,x] = colour
         self.show()
       if cv2.waitKey(1) & 0xFF == ord('q'):
         break
@@ -45,15 +45,15 @@ class Screen:
       chunk = []
       for _ in range(chunk_size):
         try:
-          x, y = self.buffer.get_nowait()
-          chunk.append((x, y))
+          x, y, colour = self.buffer.get_nowait()
+          chunk.append((x, y, colour))
         except queue.Empty:
           break
       x_coords = np.array([item[0] for item in chunk])
       y_coords = np.array([item[1] for item in chunk])
-      self.canvas[y_coords, x_coords] = (0,0,0)
-      # for x, y in chunk:
-      #   self.canvas[y, x] = (0,0,0)
+      colours = np.array([item[2] for item in chunk])
+      self.canvas[y_coords, x_coords] = colours
+      # self.canvas[y_coords, x_coords] = (0,0,0)
       self.show()
       
   def mainloop(self,drawline=False):

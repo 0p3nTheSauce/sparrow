@@ -45,7 +45,7 @@ class Sparrow():
     self.y_max = self.screen.height//2
     self.slowness = 1
     self.x, self.y = 0,0
-    self.color = (0,0,0)
+    self.colour = (0,0,0)
     self.size = 1
     self.image = 'v^o>'
     self.angle = 0
@@ -66,77 +66,61 @@ class Sparrow():
     self.x, self.y = x, y
     # self.screen.show()
   
+  def on_screen(self, new_coords):
+    '''return True if the coordinates are on the screen'''
+    x,y = new_coords    
+    return self.x_min <= x < self.x_max and self.y_min <= y < self.y_max
+      
+    
   def drawline(self, *args):
     curr_x, curr_y = cartesian_2_screen((self.x, self.y))
     if len(args) == 1:
       distance = args[0]
       # new_x, new_y = new_coordinate((self.x, self.y), self.angle, distance)
-      new_x, new_y = cartesian_2_screen(self.__new_coordinate(distance))
+      new_x, new_y = self.__new_coordinate(distance)
     elif len(args) == 2:
-      new_x, new_y = cartesian_2_screen(args)
+      new_x, new_y = args
       self.x, self.y = args
     else:
       raise ValueError('Invalid number of arguments')
+    new_x, new_y = cartesian_2_screen(new_x, new_y)
+    if not self.on_screen((new_x, new_y)):    
+      colour = (255,255,255)
+    else:
+      colour = self.colour
     
     if self.slowness == 0:  
       self.screen.canvas = lines.bresenham_line((curr_x, curr_y), (new_x, new_y),
-        self.screen.canvas, self.color)
+        self.screen.canvas, colour)
       self.screen.show()
     else:
       self.screen.canvas = lines.bresenham_slowness((curr_x, curr_y), (new_x, new_y),
-        self.screen.canvas, self.color, self.slowness)
-    # self.x = new_x
-    # self.y = new_y
-    
+        self.screen.canvas, colour, self.slowness)
     
   def __drawline_points(self, *args):
     '''used for parallel writing'''
     curr_x, curr_y = cartesian_2_screen((self.x, self.y))
     if len(args) == 1:
       distance = args[0]
-      new_x, new_y = cartesian_2_screen(self.__new_coordinate(distance))
+      new_x, new_y = self.__new_coordinate(distance)
     elif len(args) == 2:
-      new_x, new_y = cartesian_2_screen(args)
+      new_x, new_y = args
       self.x, self.y = args
     else:
       raise ValueError('Invalid number of arguments')
+    new_x, new_y = cartesian_2_screen(new_x, new_y)
+    if not self.on_screen((new_x, new_y)):
+      colour = (255,255,255)
+    else:
+      colour = self.colour
     
-    point_generator = lines.bresenham_points((curr_x, curr_y), (new_x, new_y))
+    point_generator = lines.bresenham_points((curr_x, curr_y), (new_x, new_y), colour)
     for point in point_generator:
-        self.screen.buffer.put((point[0], point[1]))
+        self.screen.buffer.put((point[0], point[1]), point[2])
         time.sleep(0.001)  # Critical: Allows threads to interleave
-    
-  
-  # def __new_coordinate(self, distance):
-  #   '''return the new coordinate after moving distance in the angle direction'''
-  #   new_x = self.x + distance * np.cos(self.angle)
-  #   new_y = self.y + distance * np.sin(self.angle)
-  #   if self.portal:
-  #     #if sparrow crosses the screen edge, start from the opposite 
-  #     #edge of the screen
-  #     if new_x >= self.x_max:
-  #       new_x = self.x_min + ((new_x-self.max) % self.x_max*2)
-  #     elif new_x <= self.x_min:
-  #       new_x = self.x_max - ((self.x_min-new_x) % self.x_max*2)
-  #     if new_y >= self.y_max:
-  #       new_y = self.y_min + ((new_y-self.max) % self.y_max*2)
-  #     elif new_y <= self.y_min:
-  #       new_y = self.y_max - ((self.y_min-new_y) % self.y_max*2)
-  #     self.x = new_x
-  #     self.y = new_y
-  #   else:  
-  #     #update coordinates as normal, but return max coordinayes
-  #     self.x = new_x
-  #     self.y = new_y
-  #     if new_x >= self.x_max:
-  #       new_x = self.x_max
-  #     elif new_x <= self.x_min:
-  #       new_x = self.x_min
-  #     if new_y >= self.y_max:
-  #       new_y = self.y_max
-  #     elif new_y <= self.y_min:
-  #       new_y = self.y_min 
-  #   return (new_x, new_y)
+        
+        
+        
   
   def __new_coordinate(self, distance):
     '''return the new coordinate after moving distance in the angle direction'''
@@ -175,9 +159,9 @@ class Sparrow():
     '''start drawing'''
     self.pen = True
   
-  def set_color(self, color):
-    '''set the color of the sparrow'''
-    self.color = color
+  def set_colour(self, colour):
+    '''set the colour of the sparrow'''
+    self.colour = colour
   
   def set_size(self, size):
     '''set the size of the sparrow'''
@@ -262,14 +246,6 @@ def cartesian_2_screen(coord, screen_size=(799,799)):
   '''convert the cartesian coordinates to screen coordinates'''
   x,y = coord
   x,y = round(x+300), round(300-y)
-  if x < 0:
-    x = 0
-  elif x >= screen_size[0]:
-    x = screen_size[0]-1
-  if y < 0:
-    y = 0
-  elif y >= screen_size[1]:
-    y = screen_size[1]-1
   return (x,y)
 
 def screen_2_cartesian(coord):
@@ -289,7 +265,7 @@ def main():
   sparrow.forward(100)
   sparrow.left(deg_2_rad(90))
   sparrow.forward(100)
-  sparrow.set_color((255,0,0))
+  sparrow.set_colour((255,0,0))
   sparrow.goto(0,0)
   wn.mainloop()
   

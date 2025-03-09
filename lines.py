@@ -36,7 +36,7 @@ def bresenham_slowness(start, end, screen, colour=(0,0,0), slowness=1):
       y1 = y1 + sy
   return screen
 
-def bresenham_points(start, end):
+def bresenham_points(start, end,colour=(0,0,0)):
   '''generate the points of a line from start to end'''
   x1,y1 = start
   x2,y2 = end
@@ -52,7 +52,7 @@ def bresenham_points(start, end):
     sy = -1
   err = dx-dy
   while True:
-    yield (x1,y1)
+    yield (x1,y1,colour)
     if x1==x2 and y1==y2:
       break
     e2 = 2*err
