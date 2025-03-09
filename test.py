@@ -78,6 +78,7 @@ def test_big_triangle():
   wn.mainloop()
   
 def rand_triangle(sparrow,distance,drawline=False):
+  sparrow.portal=True
   for _ in range(100):
     sparrow.penup()
     rand_x = random.randint(-200,200)
@@ -156,10 +157,10 @@ def main():
   #test_parallel()
   #test_big_triangle()
   #test_more_triangles()
-  #benchmark(test_parallel)
+  benchmark(test_parallel)
   
-  # benchmark(test_more_triangles)
-  cross_y_borders_left()
+  #benchmark(test_more_triangles)
+  #cross_y_borders_left()
   #cross_y_borders_right()
   
 if __name__ == '__main__':

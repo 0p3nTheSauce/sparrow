@@ -38,6 +38,10 @@ def run_parallel(task, sparrow, *args):
 class Sparrow():
   def __init__(self):
     self.screen = Screen()
+    self.x_min = -self.screen.width//2
+    self.x_max = self.screen.width//2
+    self.y_min = -self.screen.height//2
+    self.y_max = self.screen.height//2
     self.slowness = 1
     self.x, self.y = 0,0
     self.color = (0,0,0)
@@ -46,6 +50,7 @@ class Sparrow():
     self.angle = 0
     self.pen = True
     self.priority = 0 #0 is the highest, 1 is the next highest, etc.
+    self.portal=False
     
   def clear(self):
     self.screen.clear()
@@ -105,8 +110,31 @@ class Sparrow():
     '''return the new coordinate after moving distance in the angle direction'''
     new_x = self.x + distance * np.cos(self.angle)
     new_y = self.y + distance * np.sin(self.angle)
-    self.x = new_x
-    self.y = new_y
+    if self.portal:
+      #if sparrow crosses the screen edge, start from the opposite 
+      #edge of the screen
+      if new_x >= self.x_max:
+        new_x = self.x_min + ((new_x-self.max) % self.x_max*2)
+      elif new_x <= self.x_min:
+        new_x = self.x_max - ((self.x_min-new_x) % self.x_max*2)
+      if new_y >= self.y_max:
+        new_y = self.y_min + ((new_y-self.max) % self.y_max*2)
+      elif new_y <= self.y_min:
+        new_y = self.y_max - ((self.y_min-new_y) % self.y_max*2)
+      self.x = new_x
+      self.y = new_y
+    else:  
+      #update coordinates as normal, but return max coordinayes
+      self.x = new_x
+      self.y = new_y
+      if new_x >= self.x_max:
+        new_x = self.x_max
+      elif new_x <= self.x_min:
+        new_x = self.x_min
+      if new_y >= self.y_max:
+        new_y = self.y_max
+      elif new_y <= self.y_min:
+        new_y = self.y_min 
     return (new_x, new_y)
     
   def forward(self, distance,drawline=False):
