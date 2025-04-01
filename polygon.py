@@ -64,41 +64,50 @@ def get_line(sorted_by_y, i, line_num):
       break
     pnt = sorted_by_y[i]
   return line, i
-  
-  
+
+def get_line_points(points, curr_y):
+  line_points = []
+  removed = 0
+  for point in points:
+    if point[1] == curr_y:
+      line_points.append(point)
+      removed += 1
+    else:
+      break
+  return line_points, points[removed:]
+
+def get_fill_boundaries(line_points):
+  if len(line_points < 2):
+    return line_points
+  else:
+    pnt1 = line_points[0]
+    pnt2 = line_points[1]
+    if (pnt2[0] - pnt1[0]) == 1: #points are 1 pixel apart, take second
+      return get_fill_boundaries(line_points[1:])
+    else: #each point is on an edge and should be kept
+      return [pnt1] + get_fill_boundaries(line_points[1:])
+       
+def remove_duplicate_points(points):
+  if len(points) == 1:
+    return points
+  else:
+    pnt1 = points[0]
+    pnt2 = points[1]
+    if pnt1 == pnt2:
+      return remove_duplicate_points(points[1:])
+    else:
+      return [pnt1] + remove_duplicate_points(points[1:])
+
 def fill_poly(screen, points):
   # sorted_by_x = sorted(points, key=lambda x: x[0])
   sorted_by_y = sorted(points, key=lambda x: x[1])
 
   y_min = sorted_by_y[0][1]
   y_max = sorted_by_y[-1][1]
-  i = 0
-  line_num = y_min
-  while i < len(points):
-    line, i = get_line(sorted_by_y, i, line_num)
-    line = sorted(line, key=lambda x: x[0])
-    line_num += 1
-    point_pos = 1
-    x_min = line[0][0]
-    if point_pos < len(line):
-      next_x = line[point_pos][0]
-    else:
-      next_x = line[-1][0]
-    x_max = line[-1][0]
-    on_shape = True
-    for j in range(x_min+1, x_max):
-      if (j == next_x):
-        point_pos += 1
-        if point_pos >= len(line):
-          break
-        next_x = line[point_pos][0]
-        on_shape = not on_shape
-      if on_shape:
-        if i < 600 and j < 600:
-          screen[i,j] = (0,0,0)
-    cv2.imshow('filling', screen)
-    cv2.waitKey(5)
-        
+  curr_y = y_min
+  while curr_y < y_max:
+    line_points, points = get_line_points(points, curr_y)
+    
         
   return screen
 

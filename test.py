@@ -156,8 +156,8 @@ def cross_y_borders_right():
 def main():
   #test_parallel()
   #test_big_triangle()
-  #test_more_triangles()
-  benchmark(test_parallel)
+  test_more_triangles()
+  #benchmark(test_parallel)
   
   #benchmark(test_more_triangles)
   #cross_y_borders_left()
