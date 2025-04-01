@@ -43,7 +43,7 @@ def my_shape(screen):
   for point in all_edges: 
     x,y = point
     screen[y,x] = (0,0,0)
-  return screen, all_edges
+  return screen, [edge1,edge2,edge3,edge4]
     
 def one_line(screen):
   pnt1 = (100,100)
@@ -78,21 +78,26 @@ def get_line_points(points, curr_y):
       break
   return line_points, points[removed:]
 
-def get_fill_boundaries(line_points):
+def get_fill_boundaries(line_points, edges):
   line_points = sorted(line_points, key=lambda x: x[0])
-  
-  def rec_fill(line_points):
+  neighbours = []
+  def rec_fill(line_points, neighbours, edges):
     if len(line_points) < 2:
       return line_points  
     else:
       pnt1 = line_points[0]
       pnt2 = line_points[1]
-      if (pnt2[0] - pnt1[0]) == 1: #points are 1 pixel apart, take second
-        return rec_fill(line_points[1:])
-      else: #each point is on an edge and should be kept
-        return [pnt1] + rec_fill(line_points[1:])
-  
-  return rec_fill(line_points)
+      neighbours.append(pnt1)
+      if (pnt2[0] - pnt1[0]) == 1: #points are 1 pixel apart
+        return rec_fill(line_points[1:], neighbours,edges)
+      else: #each point is on an edge 
+        if in_2_edges(neighbours, edges): #we only count edges not corners
+          neighbours=[]
+          return rec_fill(line_points[1:], neighbours,edges)          
+        else:
+          neighbours=[]
+          return [pnt1] + rec_fill(line_points[1:],neighbours,edges) 
+  return rec_fill(line_points,neighbours, edges)
   
         
 def remove_duplicate_points(points):
@@ -110,6 +115,13 @@ def fill_lines(fill_bounds, screen):
     screen[y, x1:x2] = (0,0,0)
     return fill_lines(fill_bounds[2:],screen)
 
+
+def find_in_edges(point, edges):
+  return [edge for edge in edges if point in edge]
+
+def in_2_edges(neighbours, edges):
+  return sum(any(point in edge for point in neighbours) for edge in edges) >= 2
+
 def forbidden_shape(screen):
   pnt1 = (100,200)
   pnt2 = (300,500)
@@ -123,7 +135,7 @@ def forbidden_shape(screen):
   for point in all_edges: 
     x,y = point
     screen[y,x] = (0,0,0)
-  return screen, all_edges
+  return screen, [edge1,edge2,edge3,edge4]
 
 def seperate_lines(sorted_by_y):
   # sorted_by_y = sorted(points, key=lambda x: x[1])
@@ -135,19 +147,21 @@ def seperate_lines(sorted_by_y):
     seperated_by_line.append(line)
   return seperated_by_line  
   
-def fill_poly(screen, points):
+def fill_poly(screen, edges):
   # sorted_by_x = sorted(points, key=lambda x: x[0])
-  rem_dup = remove_duplicate_points(points)
+  all_points = [point for edge in edges for point in edge]
+  rem_dup = remove_duplicate_points(all_points)
   sorted_by_y = sorted(rem_dup, key=lambda x: x[1])
   lines = seperate_lines(sorted_by_y)
   for line in lines:
-    fill_bounds = get_fill_boundaries(line)
-    screen = fill_lines(fill_bounds, screen)
+    fill_bounds = get_fill_boundaries(line, edges)
+    if fill_bounds is not None:
+      screen = fill_lines(fill_bounds, screen)
   return screen
 
 def main():
   blank = np.ones((600, 600,3)) * 255
-  # blank, edge_points = my_shape(blank)
+  #blank, edge_points = my_shape(blank)
   blank, edge_points = forbidden_shape(blank)
   cv2.imshow('myshape', blank)
   cv2.waitKey(0)
