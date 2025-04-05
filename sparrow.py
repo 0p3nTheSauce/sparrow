@@ -65,13 +65,13 @@ class Sparrow():
     self.x, self.y = x, y
     # self.screen.show()
     
-  def drawline(self, new_x, new_y, filling=False):
+  def drawline(self, new_x, new_y):
     '''used for serial writing. The serial writing at the moment
     is the fastest'''
     curr_x, curr_y = cartesian_2_screen((self.x, self.y))
     new_x, new_y = cartesian_2_screen((new_x, new_y))
-    if filling:
-      edge = lines.bresenham_edge(curr_x, curr_y, new_x, new_y)
+    if self.filling:
+      edge = lines.bresenham_edge((curr_x, curr_y),( new_x, new_y))
       self.edges.append(edge)
     if self.slowness == 0:  
       self.screen.canvas = lines.bresenham_line((curr_x, curr_y), (new_x, new_y),
@@ -81,7 +81,7 @@ class Sparrow():
       self.screen.canvas = lines.bresenham_line((curr_x, curr_y), (new_x, new_y),
         self.screen.canvas, self.colour, self.slowness)
     
-  def __drawline_points(self, new_x, new_y, filling=False):
+  def __drawline_points(self, new_x, new_y):
     '''used for parallel writing. slightly slower, but can make some
     interesting things happen'''
     curr_x, curr_y = cartesian_2_screen((self.x, self.y))
@@ -90,7 +90,7 @@ class Sparrow():
     for point in point_generator:
         self.screen.buffer.put((point[0], point[1], point[2]))# point = (x, y, colour)
         time.sleep(0.001)  # Critical: Allows threads to interleave
-    if filling:
+    if self.filling:
       edge = lines.bresenham_edge(curr_x, curr_y, new_x, new_y)
       self.edges.append(edge)
   
