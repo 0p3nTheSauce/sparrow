@@ -7,10 +7,10 @@ import numpy as np
 import threading
 import time
 import random
-import lines #local import
-from screen import Screen
 import sys
-
+import lines #local import
+import polygon
+from screen import Screen
 #Global variables for Sparrow
 HOME = (0,0)
 
@@ -50,63 +50,60 @@ class Sparrow():
     self.portal=False
     self.filling=False
     self.edges=[]#for filling polygons
+    self.flocking=False
     
   def clear(self):
     self.screen.clear()
     self.screen.show()
     
-  def goto(self, x, y, penup=False, drawline=False):
+  def goto(self, x, y, penup=False):
     if not penup and self.pen:
-      if drawline:
-        self.drawline(x, y)
-      else:
+      if self.flocking:
         self.__drawline_points(x, y)
+      else:
+        self.drawline(x, y)
     self.x, self.y = x, y
     # self.screen.show()
     
-  def drawline(self, *args):
+  def drawline(self, new_x, new_y, filling=False):
+    '''used for serial writing. The serial writing at the moment
+    is the fastest'''
     curr_x, curr_y = cartesian_2_screen((self.x, self.y))
-    if len(args) == 1:
-      distance = args[0]
-      # new_x, new_y = new_coordinate((self.x, self.y), self.angle, distance)
-      new_x, new_y = self.__new_coordinate(distance)
-    elif len(args) == 2:
-      new_x, new_y = args
-      self.x, self.y = args
-    else:
-      raise ValueError('Invalid number of arguments')
     new_x, new_y = cartesian_2_screen((new_x, new_y))
-    
+    if filling:
+      edge = lines.bresenham_edge(curr_x, curr_y, new_x, new_y)
+      self.edges.append(edge)
     if self.slowness == 0:  
       self.screen.canvas = lines.bresenham_line((curr_x, curr_y), (new_x, new_y),
         self.screen.canvas, self.colour)
       self.screen.show()
     else:
-      self.screen.canvas = lines.bresenham_slowness((curr_x, curr_y), (new_x, new_y),
+      self.screen.canvas = lines.bresenham_line((curr_x, curr_y), (new_x, new_y),
         self.screen.canvas, self.colour, self.slowness)
     
-  def __drawline_points(self, *args):
-    '''used for parallel writing'''
+  def __drawline_points(self, new_x, new_y, filling=False):
+    '''used for parallel writing. slightly slower, but can make some
+    interesting things happen'''
     curr_x, curr_y = cartesian_2_screen((self.x, self.y))
-    if len(args) == 1:
-      distance = args[0]
-      new_x, new_y = self.__new_coordinate(distance)
-    elif len(args) == 2:
-      new_x, new_y = args
-      self.x, self.y = args
-    else:
-      raise ValueError('Invalid number of arguments')
     new_x, new_y = cartesian_2_screen((new_x, new_y))
-    
-    
     point_generator = lines.bresenham_points((curr_x, curr_y), (new_x, new_y), self.colour)
     for point in point_generator:
         self.screen.buffer.put((point[0], point[1], point[2]))# point = (x, y, colour)
         time.sleep(0.001)  # Critical: Allows threads to interleave
-        
+    if filling:
+      edge = lines.bresenham_edge(curr_x, curr_y, new_x, new_y)
+      self.edges.append(edge)
   
-        
-  
+  def __fill_shape(self):
+    self.screen.canvas = polygon.fill_poly(self.screen.canvas, self.edges,
+                                           self.colour, self.slowness)
+    
+  def __fill_shape_points(self):
+    point_generator = polygon.fill_poly_points(self.edges)
+    for point in point_generator:
+      self.screen.buffer.put((point[0], point[1], point[2]))#point = (x,y,colour)
+      time.sleep(0.001)
+      
   def __new_coordinate(self, distance):
     '''return the new coordinate after moving distance in the angle direction'''
     new_x = self.x + distance * np.cos(self.angle)
@@ -116,17 +113,16 @@ class Sparrow():
     self.y = new_y
     return (new_x, new_y)
     
-  def forward(self, distance,drawline=False):
+  def forward(self, distance):
     '''move the sparrow forward by distance'''
-    if drawline:
-      self.drawline(distance)
-    else:
-      self.__drawline_points(distance)
-    # self.__drawline_points(distance)
+    new_x, new_y = self.__new_coordinate(distance)
+    self.goto(new_x, new_y)
+    
   
   def backward(self, distance):
     '''move the sparrow backward by distance'''
-    self.__drawline_points(-distance)
+    new_x, new_y = self.__new_coordinate(-distance)
+    self.goto(new_x, new_y)
   
   def left(self, angle):
     '''turn the sparrow left by angle'''
@@ -143,7 +139,23 @@ class Sparrow():
   def pendown(self):
     '''start drawing'''
     self.pen = True
+
   
+    
+  
+  def begin_fill(self):
+    '''To fill a polygon, use begin_fill, then draw the edges, and finally use end_fill'''
+    self.filling=True
+
+  def end_fill(self):
+    '''To fill a polygon, use begin_fill, then draw the edges, and finally use end_fill'''
+    self.filling = False
+    if self.flocking:
+      self.__fill_shape_points()
+    else:
+      self.__fill_shape()
+      
+    
   def set_colour(self, colour):
     '''set the colour of the sparrow'''
     self.colour = colour

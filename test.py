@@ -153,10 +153,24 @@ def cross_y_borders_right():
 
 
 
+def test_basic_shape():
+  wn = Screen()
+  rock = Sparrow()
+  rock.penup()
+  rock.begin_fill()
+  rock.goto(-100,200)
+  rock.pendown()
+  rock.goto(-90,0)
+  rock.goto(90, 10)
+  rock.goto(100, 210)
+  rock.goto(-100,200)
+  rock.end_fill()
+  wn.mainloop()
 def main():
   #test_parallel()
   #test_big_triangle()
-  test_more_triangles()
+  #test_more_triangles()
+  test_basic_shape()
   #benchmark(test_parallel)
   
   #benchmark(test_more_triangles)

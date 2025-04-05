@@ -52,7 +52,7 @@ def get_line_points(points, curr_y):
 
 def get_fill_boundaries(line_points, edges):
   line_points = sorted(line_points, key=lambda x: x[0])
-  neighbours = []
+  neighbours = [] 
   def rec_fill(line_points, neighbours, edges):
     if len(line_points) < 2:
       return line_points  
@@ -100,10 +100,7 @@ def fill_lines_points(fill_bounds, colour=(0,0,0)):
       yield (x,y,colour)
     yield from fill_lines_points(fill_bounds[2:])  
 
-      
-  
-
-  
+    
 def find_in_edges(point, edges):
   return [edge for edge in edges if point in edge]
 
@@ -135,7 +132,7 @@ def seperate_lines(sorted_by_y):
     seperated_by_line.append(line)
   return seperated_by_line  
   
-def fill_poly(screen, edges):
+def fill_poly(screen, edges, colour=(0,0,0), slowness=0):
   # sorted_by_x = sorted(points, key=lambda x: x[0])
   all_points = [point for edge in edges for point in edge]
   rem_dup = remove_duplicate_points(all_points)
@@ -144,8 +141,12 @@ def fill_poly(screen, edges):
   for line in lines:
     fill_bounds = get_fill_boundaries(line, edges)
     if fill_bounds is not None:
-      screen = fill_lines(fill_bounds, screen)
+      screen = fill_lines(fill_bounds, screen, colour)
+      if slowness >=1:
+        cv2.imshow('filling polygon', screen)
+        cv2.waitKey(slowness)
   return screen
+
 
 def fill_poly_points(edges):
   all_points = [point for edge in edges for point in edge]
