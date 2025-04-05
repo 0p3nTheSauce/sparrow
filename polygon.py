@@ -1,34 +1,6 @@
 import cv2
 import numpy as np
-def bresenham_points(start, end,colour=(0,0,0)):
-  '''generate the points of a line from start to end'''
-  x1,y1 = start
-  x2,y2 = end
-  points = []
-  dx = abs(x2-x1)
-  dy = abs(y2-y1)
-  if x1<x2:
-    sx = 1
-  else:
-    sx = -1
-  if y1<y2:
-    sy = 1
-  else:
-    sy = -1
-  err = dx-dy
-  while True:
-    # yield (x1,y1,colour)
-    points.append((x1,y1))
-    if x1==x2 and y1==y2:
-      break
-    e2 = 2*err
-    if e2 > -dy:
-      err = err - dy
-      x1 = x1 + sx
-    if e2 < dx:
-      err = err + dx
-      y1 = y1 + sy
-  return points
+from lines import bresenham_points
 
 def my_shape(screen):
   pnt1 = (100,200)
@@ -103,7 +75,8 @@ def get_fill_boundaries(line_points, edges):
 def remove_duplicate_points(points):
   return list(set(points))
 
-def fill_lines(fill_bounds, screen):
+def fill_lines(fill_bounds, screen, colour=(0,0,0)):
+  '''draws horizontal line on screen'''
   if len(fill_bounds) < 2:
     return screen
   else:
@@ -112,10 +85,25 @@ def fill_lines(fill_bounds, screen):
     y = pnt1[1]
     x1 = pnt1[0]
     x2 = pnt2[0]
-    screen[y, x1:x2] = (0,0,0)
+    screen[y, x1:x2] = colour
     return fill_lines(fill_bounds[2:],screen)
 
+def fill_lines_points(fill_bounds, colour=(0,0,0)):
+  '''returns pixel points for horizontal line'''
+  if len(fill_bounds) >= 2:
+    pnt1 = fill_bounds[0]
+    pnt2 = fill_bounds[1]
+    y = pnt1[1]
+    x1 = pnt1[0]
+    x2 = pnt2[0]
+    for x in range(x1,x2+1):
+      yield (x,y,colour)
+    yield from fill_lines_points(fill_bounds[2:])  
 
+      
+  
+
+  
 def find_in_edges(point, edges):
   return [edge for edge in edges if point in edge]
 
@@ -158,6 +146,17 @@ def fill_poly(screen, edges):
     if fill_bounds is not None:
       screen = fill_lines(fill_bounds, screen)
   return screen
+
+def fill_poly_points(edges):
+  all_points = [point for edge in edges for point in edge]
+  rem_dup = remove_duplicate_points(all_points)
+  sorted_by_y = sorted(rem_dup, key=lambda x: x[1])
+  lines = seperate_lines(sorted_by_y)
+  for line in lines:
+    fill_bounds = get_fill_boundaries(line, edges)
+    if fill_bounds is not None:
+      yield from fill_lines_points(fill_bounds)
+
 
 def main():
   blank = np.ones((600, 600,3)) * 255

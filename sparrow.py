@@ -48,6 +48,8 @@ class Sparrow():
     self.pen = True
     self.priority = 0 #0 is the highest, 1 is the next highest, etc.
     self.portal=False
+    self.filling=False
+    self.edges=[]#for filling polygons
     
   def clear(self):
     self.screen.clear()
@@ -99,10 +101,10 @@ class Sparrow():
     
     point_generator = lines.bresenham_points((curr_x, curr_y), (new_x, new_y), self.colour)
     for point in point_generator:
-        self.screen.buffer.put((point[0], point[1], point[2]))
+        self.screen.buffer.put((point[0], point[1], point[2]))# point = (x, y, colour)
         time.sleep(0.001)  # Critical: Allows threads to interleave
         
-        
+  
         
   
   def __new_coordinate(self, distance):
