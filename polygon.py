@@ -68,8 +68,8 @@ def get_fill_boundaries(line_points, edges):
         if in_2:#check if points on 2 different edges
           #need to determine if point on a transistion edge
           horizontal = pnt1[1]
-          side_edge1 = side_of(horizontal, vertex_edges[0])
-          side_edge2 = side_of(horizontal, vertex_edges[1])
+          side_edge1 = side_of_screen(horizontal, vertex_edges[0])
+          side_edge2 = side_of_screen(horizontal, vertex_edges[1])
           if side_edge1 == side_edge2 or side_edge1 == 0 or side_edge2 == 0:
             #it is an extremal edge (same side of horizontal)
             return rec_fill(line_points[1:], neighbours,edges)
@@ -80,18 +80,39 @@ def get_fill_boundaries(line_points, edges):
           return [pnt1] + rec_fill(line_points[1:],neighbours,edges) 
   return rec_fill(line_points,neighbours, edges)
   
-def side_of(horizontal, edge):
+def side_of_cart(horizontal, edge):
   '''returns an integer based on wether edge is above, hoizontal, or below  
-  1,0,-1 respectively'''
+  1,0,-1 respectively. Uses cartesian coordinates. Makes the assumption that
+  we are doing this for a point (and possibly it's neighbours) on a vertex'''
+  ans = 0
   for point in edge:
     y = point[1]
     if y > horizontal: 
-      return 1
+      ans += 1
     elif y < horizontal:
-      return -1
-  return 0     
+      ans -= 1
+  return sign(ans)     
 
+def side_of_screen(horizontal, edge):
+  '''returns an integer based on wether edge is above, hoizontal, or below  
+  1,0,-1 respectively. Uses screen coordinates. Makes the assumption that
+  we are doing this for a point (and possibly it's neighbours) on a vertex'''
+  ans = 0
+  for point in edge:
+    y = point[1]
+    if y < horizontal: 
+      ans += 1
+    elif y > horizontal:
+      ans -= 1
+  return sign(ans)
 
+def sign(ans):
+  if ans > 0:
+    return 1
+  elif ans < 0:
+    return -1
+  else:
+    return 0
 def remove_duplicate_points(points):
   return list(set(points))
 
@@ -193,7 +214,7 @@ def main():
   blank, edge_points = forbidden_shape(blank)
   cv2.imshow('myshape', blank)
   cv2.waitKey(0)
-  blank_filled = fill_poly(blank, edge_points)
+  blank_filled = fill_poly(blank, edge_points, slowness=10)
   cv2.imshow('myshape filled', blank_filled)
   cv2.waitKey(0)
   cv2.destroyAllWindows()

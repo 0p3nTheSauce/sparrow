@@ -51,9 +51,23 @@ def test_find_edges():
   print(f"Neighbours {nbrs4_off2} on 2 edges: {in_2_edges(nbrs4_off2, edges)}")
   print(f"Neighbours {nbrs5_off2} on 2 edges: {in_2_edges(nbrs5_off2, edges)}")
   print(f"Neighbours {nbrs6_off2} on 2 edges: {in_2_edges(nbrs6_off2, edges)}")
+
+def test_side_of_edges():
+  from polygon import side_of_screen
+  edges = [[(3,0), (2,1),(3,1),(1,2),(2,2),(0,3),(1,3)], [(3,0),(3,1),(4,1),(4,2),(5,2),(5,3),(6,3)]]
+  for horiz in range(2):
+    print(f'Y = {horiz}:')
+    side1 = side_of_screen(horiz, edges[0])
+    side2 = side_of_screen(horiz, edges[1])
+    print(f'side of edge1: {side1}')
+    print(f'side of edge2: {side2}')
+    print(f'Passed: {side1 == side2 == -1}')
+    print()  
+
 def main():
   #test_point_funcs()
   # test_process_points()
-  test_find_edges()
+  # test_find_edges()
+  test_side_of_edges()
 if __name__ == '__main__':
   main()
