@@ -129,18 +129,28 @@ def fill_lines(fill_bounds, screen, colour=(0,0,0)):
     screen[y, x1:x2] = colour
     return fill_lines(fill_bounds[2:],screen)
 
+# def fill_lines_points(fill_bounds, colour=(0,0,0)):
+#   '''returns pixel points for horizontal line'''
+#   if len(fill_bounds) >= 2:
+#     pnt1 = fill_bounds[0]
+#     pnt2 = fill_bounds[1]
+#     y = pnt1[1]
+#     x1 = pnt1[0]
+#     x2 = pnt2[0]
+#     for x in range(x1,x2+1):
+#       yield (x,y,colour)
+#     yield from fill_lines_points(fill_bounds[2:])  
+
 def fill_lines_points(fill_bounds, colour=(0,0,0)):
-  '''returns pixel points for horizontal line'''
+  '''returns pixel coordinatesfor horizontal line'''
   if len(fill_bounds) >= 2:
     pnt1 = fill_bounds[0]
     pnt2 = fill_bounds[1]
     y = pnt1[1]
     x1 = pnt1[0]
     x2 = pnt2[0]
-    for x in range(x1,x2+1):
-      yield (x,y,colour)
+    yield (x1,x2,y,colour)
     yield from fill_lines_points(fill_bounds[2:])  
-
     
 def find_in_edges(point, edges):
   return [edge for edge in edges if point in edge]
@@ -197,7 +207,7 @@ def fill_poly(screen, edges, colour=(0,0,0), slowness=0):
   return screen
 
 
-def fill_poly_points(edges):
+def fill_poly_points(edges, colour=(0,0,0)):
   all_points = [point for edge in edges for point in edge]
   rem_dup = remove_duplicate_points(all_points)
   sorted_by_y = sorted(rem_dup, key=lambda x: x[1])
@@ -205,7 +215,7 @@ def fill_poly_points(edges):
   for line in lines:
     fill_bounds = get_fill_boundaries(line, edges)
     if fill_bounds is not None:
-      yield from fill_lines_points(fill_bounds)
+      yield from fill_lines_points(fill_bounds, colour)
 
 
 def main():

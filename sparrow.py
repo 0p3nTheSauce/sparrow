@@ -17,9 +17,9 @@ HOME = (0,0)
 
   
     
-def run_parallel(task, sparrow, *args):
+def run_parallel(task,*args):
   '''run tasks in parallel'''
-  thread = threading.Thread(target=task, args=(sparrow, *args))
+  thread = threading.Thread(target=task, args=args)
   thread.start()
   return thread
 
@@ -87,11 +87,12 @@ class Sparrow():
     curr_x, curr_y = cartesian_2_screen((self.x, self.y))
     new_x, new_y = cartesian_2_screen((new_x, new_y))
     point_generator = lines.bresenham_points((curr_x, curr_y), (new_x, new_y), self.colour)
+    edge = []
     for point in point_generator:
-        self.screen.buffer.put((point[0], point[1], point[2]))# point = (x, y, colour)
+        self.screen.buffer.put(point)# point = (x, y, colour)
+        edge.append((point[0],point[1]))
         time.sleep(0.001)  # Critical: Allows threads to interleave
     if self.filling:
-      edge = lines.bresenham_edge((curr_x, curr_y), (new_x, new_y))
       self.edges.append(edge)
   
   def __fill_shape(self):
@@ -100,8 +101,8 @@ class Sparrow():
     
   def __fill_shape_points(self):
     point_generator = polygon.fill_poly_points(self.edges)
-    for point in point_generator:
-      self.screen.buffer.put((point[0], point[1], point[2]))#point = (x,y,colour)
+    for horiz in point_generator:
+      self.screen.buffer.put(horiz)#point = (x,y,colour)
       time.sleep(0.001)
       
   def __new_coordinate(self, distance):

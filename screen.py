@@ -46,14 +46,45 @@ class Screen:
       if cv2.waitKey(1) & 0xFF == ord('q'):
         break
   
+  # def chunks_update(self, chunk_size=100):
+  #   while True:
+  #     chunk = []
+  #     for _ in range(chunk_size):
+  #       try:
+  #         x, y, colour = self.buffer.get_nowait()
+  #         if self.on_screen((x,y)):
+  #           chunk.append((x, y, colour))
+  #       except queue.Empty:
+  #         break
+  #     if not chunk:
+  #       break
+  #     x_coords = np.array([item[0] for item in chunk])
+  #     y_coords = np.array([item[1] for item in chunk])
+  #     colours = np.array([item[2] for item in chunk])
+  #     self.canvas[y_coords, x_coords] = colours
+  #     # self.canvas[y_coords, x_coords] = (0,0,0)
+  #     self.show()
+  
   def chunks_update(self, chunk_size=100):
     while True:
       chunk = []
       for _ in range(chunk_size):
         try:
-          x, y, colour = self.buffer.get_nowait()
-          if self.on_screen((x,y)):
-            chunk.append((x, y, colour))
+          data = self.buffer.get_nowait()
+          if len(data) == 3: #data is a single point
+            x, y, colour = data          
+            if self.on_screen((x,y)):
+              chunk.append((x, y, colour))
+          else:#data is a horizontal line
+            x1,x2,y,colour = data
+            if self.on_screen((x1,y)) and self.on_screen((x2,y)):
+              self.canvas[y, x1:x2] = colour
+              self.show()
+            else:
+              #the line is not fully on the screen
+              for x in range(x1,x2+1):
+                if self.on_screen(x,y):
+                  chunk.append((x, y, colour))
         except queue.Empty:
           break
       if not chunk:
