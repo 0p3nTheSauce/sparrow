@@ -140,7 +140,11 @@ class Sparrow():
     '''start drawing'''
     self.pen = True
 
-  
+  def flock(self):
+    self.flocking=True
+
+  def alone(self):
+    self.flocking=False
     
   
   def begin_fill(self):

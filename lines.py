@@ -90,6 +90,14 @@ def bresenham_line(start, end, screen, colour=(0,0,0), slowness=0):
       y1 = y1 + sy
   return screen
 
+def edge_dir(edge):
+  '''assumes edge is a collection of points'''
+  x0,y0 = edge[0]
+  x1,y1 = edge[-1]
+  slope = (y1-y0)/(x1-x0)
+  intercept = y1 - (slope * x1)
+  return slope, intercept
+  
 def main():
   blank = np.ones((600, 600,3)) * 255
   start = (300,10)
