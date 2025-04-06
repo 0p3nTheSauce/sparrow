@@ -214,7 +214,7 @@ def main():
   blank, edge_points = forbidden_shape(blank)
   cv2.imshow('myshape', blank)
   cv2.waitKey(0)
-  blank_filled = fill_poly(blank, edge_points, slowness=10)
+  blank_filled = fill_poly(blank, edge_points, slowness=0)
   cv2.imshow('myshape filled', blank_filled)
   cv2.waitKey(0)
   cv2.destroyAllWindows()

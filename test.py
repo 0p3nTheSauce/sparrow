@@ -157,6 +157,7 @@ def test_basic_shape():
   wn = Screen()
   rock = Sparrow()
   rock.penup()
+  rock.flock()
   rock.begin_fill()
   rock.goto(-100,200)
   rock.pendown()

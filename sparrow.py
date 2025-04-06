@@ -91,7 +91,7 @@ class Sparrow():
         self.screen.buffer.put((point[0], point[1], point[2]))# point = (x, y, colour)
         time.sleep(0.001)  # Critical: Allows threads to interleave
     if self.filling:
-      edge = lines.bresenham_edge(curr_x, curr_y, new_x, new_y)
+      edge = lines.bresenham_edge((curr_x, curr_y), (new_x, new_y))
       self.edges.append(edge)
   
   def __fill_shape(self):
