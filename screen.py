@@ -7,7 +7,7 @@ import polygon
 class Screen:
   _instance = None 
   
-  def __new__(cls, width=799, height=799, bg_color=(255, 255, 255), colour=(0,0,0)):
+  def __new__(cls, width=2000, height=2000, bg_color=(255, 255, 255), colour=(0,0,0)):
     if cls._instance is None:
       cls._instance = super(Screen, cls).__new__(cls)
       cls._instance.width = width
