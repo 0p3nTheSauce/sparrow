@@ -89,7 +89,7 @@ class Sparrow():
     point_generator = lines.bresenham_points((curr_x, curr_y), (new_x, new_y), self.colour)
     edge = []
     for point in point_generator:
-        self.screen.buffer.put(point)# point = (x, y, colour)
+        self.screen.point_buff.put(point)# point = (x, y, colour)
         edge.append((point[0],point[1]))
         time.sleep(0.001)  # Critical: Allows threads to interleave
     if self.filling:
@@ -99,12 +99,14 @@ class Sparrow():
     self.screen.canvas = polygon.fill_poly(self.screen.canvas, self.edges,
                                            self.colour, self.slowness)
     
-  def __fill_shape_points(self):
-    point_generator = polygon.fill_poly_points(self.edges)
-    for horiz in point_generator:
-      self.screen.buffer.put(horiz)#point = (x,y,colour)
-      time.sleep(0.001)
-      
+  def __fill_shape_flock(self):
+    # point_generator = polygon.fill_poly_points(self.edges)
+    # for horiz in point_generator:
+    #   self.screen.buffer.put(horiz)#point = (x,y,colour)
+    #   time.sleep(0.001)
+    poly = polygon.Polygon(self.colour, self.edges)
+    self.screen.poly_buff.put(poly)
+    
   def __new_coordinate(self, distance):
     '''return the new coordinate after moving distance in the angle direction'''
     new_x = self.x + distance * np.cos(self.angle)
@@ -156,7 +158,7 @@ class Sparrow():
     '''To fill a polygon, use begin_fill, then draw the edges, and finally use end_fill'''
     self.filling = False
     if self.flocking:
-      self.__fill_shape_points()
+      self.__fill_shape_flock()
     else:
       self.__fill_shape()
       

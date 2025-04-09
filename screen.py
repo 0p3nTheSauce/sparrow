@@ -2,6 +2,8 @@ import numpy as np
 import queue
 import cv2
 
+#local
+import polygon
 class Screen:
   _instance = None 
   
@@ -13,7 +15,9 @@ class Screen:
       cls._instance.bg_color = bg_color
       cls._instance.colour = colour
       cls._instance.slowness=0
-      cls._instance.buffer = queue.Queue()
+      # cls._instance.buffer = queue.Queue()
+      cls._instance.point_buff = queue.Queue()
+      cls._instance.poly_buff = queue.Queue()
       cls._instance.canvas = np.ones((height, width, 3),
         dtype=np.uint8) * np.array(bg_color, dtype=np.uint8)
     return cls._instance
@@ -46,47 +50,23 @@ class Screen:
       if cv2.waitKey(1) & 0xFF == ord('q'):
         break
   
-  # def chunks_update(self, chunk_size=100):
-  #   while True:
-  #     chunk = []
-  #     for _ in range(chunk_size):
-  #       try:
-  #         x, y, colour = self.buffer.get_nowait()
-  #         if self.on_screen((x,y)):
-  #           chunk.append((x, y, colour))
-  #       except queue.Empty:
-  #         break
-  #     if not chunk:
-  #       break
-  #     x_coords = np.array([item[0] for item in chunk])
-  #     y_coords = np.array([item[1] for item in chunk])
-  #     colours = np.array([item[2] for item in chunk])
-  #     self.canvas[y_coords, x_coords] = colours
-  #     # self.canvas[y_coords, x_coords] = (0,0,0)
-  #     self.show()
-  
   def chunks_update(self, chunk_size=100):
     while True:
       chunk = []
       for _ in range(chunk_size):
         try:
-          data = self.buffer.get_nowait()
-          if len(data) == 3: #data is a single point
-            x, y, colour = data          
-            if self.on_screen((x,y)):
-              chunk.append((x, y, colour))
-          else:#data is a horizontal line
-            x1,x2,y,colour = data
-            if self.on_screen((x1,y)) and self.on_screen((x2,y)):
-              self.canvas[y, x1:x2] = colour
-              self.show()
-            else:
-              #the line is not fully on the screen
-              for x in range(x1,x2+1):
-                if self.on_screen(x,y):
-                  chunk.append((x, y, colour))
+          data = self.point_buff.get_nowait()
+          x, y, colour = data          
+          if self.on_screen((x,y)):
+            chunk.append((x, y, colour))
         except queue.Empty:
           break
+      try:
+        poly = self.poly_buff.get_nowait()
+        self.canvas = polygon.fill_poly(self.canvas, poly.edges,
+                                        poly.colour)
+      except queue.Empty:
+        pass 
       if not chunk:
         break
       x_coords = np.array([item[0] for item in chunk])

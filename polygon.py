@@ -16,7 +16,13 @@ def my_shape(screen):
     x,y = point
     screen[y,x] = (0,0,0)
   return screen, [edge1,edge2,edge3,edge4]
-    
+
+class Polygon():
+  def __init__(self, colour, edges):
+    self.edges = edges
+    self.colour = colour
+
+
 def one_line(screen):
   pnt1 = (100,100)
   pnt2 = (500,500)
