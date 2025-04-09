@@ -167,7 +167,7 @@ def test_basic_shape(sparr):
   sparr.end_fill()
   # wn.mainloop()
   
-def test_basic_shape_seriel():
+def test_basic_shape_serial():
   wn = Screen()
   rock = Sparrow()
   test_basic_shape(rock)
@@ -185,7 +185,8 @@ def main():
   #test_big_triangle()
   #test_more_triangles()
   #test_basic_shape_seriel()
-  test_basic_shape_parallel()
+  #test_basic_shape_parallel()
+  test_basic_shape_serial()
   #benchmark(test_parallel)
   
   #benchmark(test_more_triangles)

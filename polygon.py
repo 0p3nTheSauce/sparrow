@@ -208,7 +208,7 @@ def fill_poly(screen, edges, colour=(0,0,0), slowness=0):
     if fill_bounds is not None:
       screen = fill_lines(fill_bounds, screen, colour)
       if slowness >=1:
-        cv2.imshow('filling polygon', screen)
+        cv2.imshow('Sparrow Screen', screen)
         cv2.waitKey(slowness)
   return screen
 

@@ -145,7 +145,12 @@ class Sparrow():
 
   def flock(self):
     self.flocking=True
-
+    self.screen.flock_on()
+        
+  def solo(self):
+    self.flocking=False
+    self.screen.flock_off()
+    
   def alone(self):
     self.flocking=False
     

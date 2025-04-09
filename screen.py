@@ -18,6 +18,7 @@ class Screen:
       # cls._instance.buffer = queue.Queue()
       cls._instance.point_buff = queue.Queue()
       cls._instance.poly_buff = queue.Queue()
+      cls._instance.flock=False
       cls._instance.canvas = np.ones((height, width, 3),
         dtype=np.uint8) * np.array(bg_color, dtype=np.uint8)
     return cls._instance
@@ -28,7 +29,12 @@ class Screen:
     if key == 27:
       cv2.destroyAllWindows()
       
-    
+  def flock_on(self):
+    self.flock = True
+  
+  def flock_off(self):
+    self.flock = False
+  
   def clear(self):
     self.canvas[:] = self.bg_color
   
@@ -76,8 +82,8 @@ class Screen:
       # self.canvas[y_coords, x_coords] = (0,0,0)
       self.show()
       
-  def mainloop(self,drawline=False):
-    if drawline:
+  def mainloop(self):
+    if self.flock:
       # self.seq_update()
       self.show(0)
     else: 

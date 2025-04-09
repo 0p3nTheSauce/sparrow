@@ -77,7 +77,7 @@ def bresenham_line(start, end, screen, colour=(0,0,0), slowness=0):
   while True:
     screen[y1,x1] = colour
     if slowness >= 1:
-      cv2.imshow('drawing line', screen)
+      cv2.imshow('Sparrow Screen', screen)
       cv2.waitKey(slowness)
     if x1==x2 and y1==y2:
       break
