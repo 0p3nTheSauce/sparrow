@@ -39,7 +39,8 @@ def run_parallel(task,*args):
 class Sparrow():
   def __init__(self):
     self.screen = Screen()
-    self.slowness = 1
+    self.speed = 5 #make -1 for max speed
+    self.extra_slowness=1
     self.x, self.y = 0,0
     self.colour = (0,0,0)
     self.size = 1
@@ -73,13 +74,13 @@ class Sparrow():
     if self.filling:
       edge = lines.bresenham_edge((curr_x, curr_y),( new_x, new_y))
       self.edges.append(edge)
-    if self.slowness == 0:  
+    if self.speed == -1:  
       self.screen.canvas = lines.bresenham_line((curr_x, curr_y), (new_x, new_y),
         self.screen.canvas, self.colour)
       self.screen.show()
     else:
       self.screen.canvas = lines.bresenham_line((curr_x, curr_y), (new_x, new_y),
-        self.screen.canvas, self.colour, self.slowness)
+        self.screen.canvas, self.colour, self.speed, self.extra_slowness)
     
   def __drawline_points(self, new_x, new_y):
     '''used for parallel writing. slightly slower, but can make some
@@ -192,7 +193,10 @@ class Sparrow():
     
   def set_slowness(self, slowness):
     '''set the slowness of the sparrow'''
-    self.slowness = slowness 
+    self.extra_slowness = slowness 
+
+  def set_speed(self, speed):
+    self.speed = speed
 
 def small_circle(coord,screen,colour=(0,0,0)):
   '''draw a small circle at x,y on the screen'''
