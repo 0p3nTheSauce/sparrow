@@ -63,6 +63,15 @@ def bresenham_line(start, end, screen, colour=(0,0,0), slowness=0):
   '''draw a line from start to end on the screen'''
   x1,y1 = start
   x2,y2 = end
+  wait = 1
+  num_skip = 0
+  if slowness > 0:
+    if slowness > 10:
+      wait = slowness // 10
+      slowness = 10
+    num_skip = 10 - slowness
+
+  count = 0
   dx = abs(x2-x1)
   dy = abs(y2-y1)
   if x1<x2:
@@ -76,9 +85,12 @@ def bresenham_line(start, end, screen, colour=(0,0,0), slowness=0):
   err = dx-dy
   while True:
     screen[y1,x1] = colour
-    if slowness >= 1:
+    if count != 0 and count == num_skip:
       cv2.imshow('Sparrow Screen', screen)
-      cv2.waitKey(slowness)
+      cv2.waitKey(wait)
+      count = 0
+    else:
+      count += 1
     if x1==x2 and y1==y2:
       break
     e2 = 2*err
@@ -89,6 +101,9 @@ def bresenham_line(start, end, screen, colour=(0,0,0), slowness=0):
       err = err + dx
       y1 = y1 + sy
   return screen
+
+
+  
 
 def edge_dir(edge):
   '''assumes edge is a collection of points'''

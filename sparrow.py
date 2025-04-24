@@ -129,11 +129,12 @@ class Sparrow():
   
   def left(self, angle):
     '''turn the sparrow left by angle'''
-    self.angle += angle
+    
+    self.angle += deg_2_rad(angle)
   
   def right(self, angle):
     '''turn the sparrow right by angle'''
-    self.angle -= angle
+    self.angle -= deg_2_rad(angle)
   
   def penup(self):
     '''stop drawing'''
@@ -150,10 +151,6 @@ class Sparrow():
   def solo(self):
     self.flocking=False
     self.screen.flock_off()
-    
-  def alone(self):
-    self.flocking=False
-    
   
   def begin_fill(self):
     '''To fill a polygon, use begin_fill, then draw the edges, and finally use end_fill'''

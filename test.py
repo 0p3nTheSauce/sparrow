@@ -156,15 +156,16 @@ def cross_y_borders_right():
 def test_basic_shape(sparr):
   # wn = Screen()
   # rock = Sparrow()
+  # sparr.set_slowness(1)
   sparr.penup()
-  sparr.begin_fill()
+  # sparr.begin_fill()
   sparr.goto(-100,200)
   sparr.pendown()
   sparr.goto(-90,0)
   sparr.goto(90, 10)
   sparr.goto(100, 210)
   sparr.goto(-100,200)
-  sparr.end_fill()
+  # sparr.end_fill()
   # wn.mainloop()
   
 def test_basic_shape_serial():
