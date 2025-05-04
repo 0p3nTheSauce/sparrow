@@ -2,20 +2,6 @@ import cv2
 import numpy as np
 from lines import bresenham_points, bresenham_edge
 
-def my_shape(screen):
-  pnt1 = (100,200)
-  pnt2 = (500,500)
-  edge1 = bresenham_points(pnt1, pnt2)
-  pnt3 = (500,400)
-  edge2 = bresenham_points(pnt2, pnt3)
-  pnt4 = (100,400)
-  edge3 = bresenham_points(pnt3, pnt4)
-  edge4 = bresenham_points(pnt4, pnt1)
-  all_edges = edge1+edge2+edge3+edge4
-  for point in all_edges: 
-    x,y = point
-    screen[y,x] = (0,0,0)
-  return screen, [edge1,edge2,edge3,edge4]
 
 class Polygon():
   def __init__(self, colour, edges):
@@ -122,6 +108,25 @@ def sign(ans):
 def remove_duplicate_points(points):
   return list(set(points))
 
+
+def check_points(w, h, y, x1, x2):
+  '''checks if points are in range of screen edges'''
+  if x1 < 0:
+      x1 = 0
+  if x2 < 0:
+    x2 = 0
+  if x1 >= w:
+    x1 = w-1
+  if x2 >= h:
+    x2 = h-1
+  if x1 > x2:
+    x1, x2 = x2, x1
+  if y < 0:
+    y = 0
+  if y >= h:
+    y = h-1
+  return y, x1, x2
+
 def fill_lines(fill_bounds, screen, colour=(0,0,0)):
   '''draws horizontal line on screen'''
   if len(fill_bounds) < 2:
@@ -132,8 +137,23 @@ def fill_lines(fill_bounds, screen, colour=(0,0,0)):
     y = pnt1[1]
     x1 = pnt1[0]
     x2 = pnt2[0]
+    w, h = screen.shape[0], screen.shape[1]
+    y, x1, x2 = check_points(w, h, y, x1, x2)
     screen[y, x1:x2] = colour
     return fill_lines(fill_bounds[2:],screen)
+
+# def fill_lines(fill_bounds, screen, colour=(0,0,0)):
+#   '''draws horizontal line on screen'''
+#   if len(fill_bounds) < 2:
+#     return screen
+#   else:
+#     pnt1 = fill_bounds[0]
+#     pnt2 = fill_bounds[1]
+#     y = pnt1[1]
+#     x1 = pnt1[0]
+#     x2 = pnt2[0]
+#     screen[y, x1:x2] = colour
+#     return fill_lines(fill_bounds[2:],screen)
 
 # def fill_lines_points(fill_bounds, colour=(0,0,0)):
 #   '''returns pixel points for horizontal line'''
@@ -242,17 +262,81 @@ def fill_poly_points(edges, colour=(0,0,0)):
     if fill_bounds is not None:
       yield from fill_lines_points(fill_bounds, colour)
 
-
-def main():
+def hard_shape():
   blank = np.ones((600, 600,3)) * 255
   #blank, edge_points = my_shape(blank)
   blank, edge_points = forbidden_shape(blank)
   cv2.imshow('myshape', blank)
   cv2.waitKey(0)
-  blank_filled = fill_poly(blank, edge_points, slowness=0)
+  blank_filled = fill_poly(blank, edge_points, speed=1000, slowness=1)
   cv2.imshow('myshape filled', blank_filled)
   cv2.waitKey(0)
   cv2.destroyAllWindows()
+  
+
+# def my_shape(screen):
+#   pnt1 = (100,200)
+#   pnt2 = (500,500)
+#   edge1 = bresenham_points(pnt1, pnt2)
+#   pnt3 = (500,400)
+#   edge2 = bresenham_points(pnt2, pnt3)
+#   pnt4 = (100,400)
+#   edge3 = bresenham_points(pnt3, pnt4)
+#   edge4 = bresenham_points(pnt4, pnt1)
+#   all_edges = edge1+edge2+edge3+edge4
+#   for point in all_edges: 
+#     x,y = point
+#     screen[y,x] = (0,0,0)
+#   return screen, [edge1,edge2,edge3,edge4]
+
+def forbidden_shape(screen):
+  pnt1 = (100,200)
+  pnt2 = (300,500)
+  edge1 = bresenham_edge(pnt1, pnt2)
+  pnt3 = (400,200)
+  edge2 = bresenham_edge(pnt2, pnt3)
+  pnt4 = (300,400)
+  edge3 = bresenham_edge(pnt3, pnt4)
+  edge4 = bresenham_edge(pnt4, pnt1)
+  all_edges = edge1+edge2+edge3+edge4
+  for point in all_edges: 
+    x,y = point
+    screen[y,x] = (0,0,0)
+  return screen, [edge1,edge2,edge3,edge4]
+ 
+def off_shape(screen):
+  w, h = screen.shape[0], screen.shape[1]
+  pnt1 = (-100,200)
+  pnt2 = (500,h+10)
+  edge1 = bresenham_edge(pnt1, pnt2)
+  pnt3 = (w+100,400)
+  edge2 = bresenham_edge(pnt2, pnt3)
+  pnt4 = (100,-100)
+  edge3 = bresenham_edge(pnt3, pnt4)
+  edge4 = bresenham_edge(pnt4, pnt1)
+  all_edges = edge1+edge2+edge3+edge4
+  for point in all_edges: 
+    x,y = point
+    w, h = screen.shape[0], screen.shape[1]
+    if x < 0 or x >= w or y < 0 or y >= h:
+      continue
+    else: 
+      screen[y,x] = (0,0,0)
+  return screen, [edge1,edge2,edge3,edge4]
+  
+def off_edge():
+  blank = np.ones((600, 600,3)) * 255
+  blank, edge_points = off_shape(blank)
+  cv2.imshow('myshape', blank)
+  cv2.waitKey(0)
+  blank_filled = fill_poly(blank, edge_points, speed=1000, slowness=1)
+  cv2.imshow('myshape filled', blank_filled)
+  cv2.waitKey(0)
+  cv2.destroyAllWindows()
+  
+def main():
+  # hard_shape()
+  off_edge()
 
 if __name__ == '__main__':
   main()

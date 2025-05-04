@@ -81,7 +81,11 @@ class Screen:
       self.canvas[y_coords, x_coords] = colours
       # self.canvas[y_coords, x_coords] = (0,0,0)
       self.show()
-      
+  
+  def polygon_update(self, chunk_size=100):
+    pass
+  
+  
   def mainloop(self):
     if self.flock:
       # self.seq_update()
