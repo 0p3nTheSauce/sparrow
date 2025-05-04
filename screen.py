@@ -85,8 +85,8 @@ class Screen:
   def mainloop(self):
     if self.flock:
       # self.seq_update()
+      self.chunks_update()
       self.show(0)
     else: 
-      self.chunks_update()
       self.show(0)
     

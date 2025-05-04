@@ -155,16 +155,16 @@ def cross_y_borders_right():
 
 def test_basic_shape(sparr):
   sparr.penup()
-  sparr.begin_fill()
+  # sparr.begin_fill()
   sparr.goto(-100,200)
   sparr.pendown()
   sparr.goto(-90,0)
   sparr.goto(90, 10)
   sparr.goto(100, 210)
   sparr.goto(-100,200)
-  sparr.set_speed(0)
-  sparr.set_slowness(2)
-  sparr.end_fill()
+  # sparr.set_speed(0)
+  # sparr.set_slowness(2)
+  # sparr.end_fill()
   
 def test_basic_shape_serial():
   wn = Screen()
@@ -184,8 +184,8 @@ def main():
   #test_big_triangle()
   #test_more_triangles()
   #test_basic_shape_seriel()
-  #test_basic_shape_parallel()
-  test_basic_shape_serial()
+  test_basic_shape_parallel()
+  # test_basic_shape_serial()
   #benchmark(test_parallel)
   
   #benchmark(test_more_triangles)
