@@ -142,31 +142,6 @@ def fill_lines(fill_bounds, screen, colour=(0,0,0)):
     screen[y, x1:x2] = colour
     return fill_lines(fill_bounds[2:],screen)
 
-# def fill_lines(fill_bounds, screen, colour=(0,0,0)):
-#   '''draws horizontal line on screen'''
-#   if len(fill_bounds) < 2:
-#     return screen
-#   else:
-#     pnt1 = fill_bounds[0]
-#     pnt2 = fill_bounds[1]
-#     y = pnt1[1]
-#     x1 = pnt1[0]
-#     x2 = pnt2[0]
-#     screen[y, x1:x2] = colour
-#     return fill_lines(fill_bounds[2:],screen)
-
-# def fill_lines_points(fill_bounds, colour=(0,0,0)):
-#   '''returns pixel points for horizontal line'''
-#   if len(fill_bounds) >= 2:
-#     pnt1 = fill_bounds[0]
-#     pnt2 = fill_bounds[1]
-#     y = pnt1[1]
-#     x1 = pnt1[0]
-#     x2 = pnt2[0]
-#     for x in range(x1,x2+1):
-#       yield (x,y,colour)
-#     yield from fill_lines_points(fill_bounds[2:])  
-
 def fill_lines_points(fill_bounds, colour=(0,0,0)):
   '''returns pixel coordinatesfor horizontal line'''
   if len(fill_bounds) >= 2:
@@ -217,7 +192,7 @@ def seperate_lines(sorted_by_y):
     seperated_by_line.append(line)
   return seperated_by_line  
   
-def fill_poly(screen, edges, colour=(0,0,0), speed=100, slowness=0):
+def fill_poly(screen, edges, colour=(0,0,0), speed=100, slowness=1):
   # sorted_by_x = sorted(points, key=lambda x: x[0])
   all_points = [point for edge in edges for point in edge]
   rem_dup = remove_duplicate_points(all_points)
@@ -235,22 +210,6 @@ def fill_poly(screen, edges, colour=(0,0,0), speed=100, slowness=0):
       else:
         count += 1
   return screen
-
-
-# def fill_poly(screen, edges, colour=(0,0,0), slowness=0):
-#   # sorted_by_x = sorted(points, key=lambda x: x[0])
-#   all_points = [point for edge in edges for point in edge]
-#   rem_dup = remove_duplicate_points(all_points)
-#   sorted_by_y = sorted(rem_dup, key=lambda x: x[1])
-#   lines = seperate_lines(sorted_by_y)
-#   for line in lines:
-#     fill_bounds = get_fill_boundaries(line, edges)
-#     if fill_bounds is not None:
-#       screen = fill_lines(fill_bounds, screen, colour)
-#       if slowness >=1:
-#         cv2.imshow('Sparrow Screen', screen)
-#         cv2.waitKey(slowness)
-#   return screen
 
 def fill_poly_points(edges, colour=(0,0,0)):
   all_points = [point for edge in edges for point in edge]
@@ -273,21 +232,6 @@ def hard_shape():
   cv2.waitKey(0)
   cv2.destroyAllWindows()
   
-
-# def my_shape(screen):
-#   pnt1 = (100,200)
-#   pnt2 = (500,500)
-#   edge1 = bresenham_points(pnt1, pnt2)
-#   pnt3 = (500,400)
-#   edge2 = bresenham_points(pnt2, pnt3)
-#   pnt4 = (100,400)
-#   edge3 = bresenham_points(pnt3, pnt4)
-#   edge4 = bresenham_points(pnt4, pnt1)
-#   all_edges = edge1+edge2+edge3+edge4
-#   for point in all_edges: 
-#     x,y = point
-#     screen[y,x] = (0,0,0)
-#   return screen, [edge1,edge2,edge3,edge4]
 
 def forbidden_shape(screen):
   pnt1 = (100,200)

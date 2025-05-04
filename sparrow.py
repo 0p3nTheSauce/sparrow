@@ -40,7 +40,7 @@ class Sparrow():
   def __init__(self):
     self.screen = Screen()
     self.speed = 5 #make -1 for max speed
-    self.extra_slowness=1
+    self.slowness=1
     self.x, self.y = 0,0
     self.colour = (0,0,0)
     self.size = 1
@@ -80,7 +80,7 @@ class Sparrow():
       self.screen.show()
     else:
       self.screen.canvas = lines.bresenham_line((curr_x, curr_y), (new_x, new_y),
-        self.screen.canvas, self.colour, self.speed, self.extra_slowness)
+        self.screen.canvas, self.colour, self.speed, self.slowness)
     
   def __drawline_points(self, new_x, new_y):
     '''used for parallel writing. slightly slower, but can make some
@@ -93,12 +93,13 @@ class Sparrow():
         self.screen.point_buff.put(point)# point = (x, y, colour)
         edge.append((point[0],point[1]))
         time.sleep(0.001)  # Critical: Allows threads to interleave
+        # time.sleep(self.slowness / self.speed)  # Critical: Allows threads to interleave
     if self.filling:
       self.edges.append(edge)
   
   def __fill_shape(self):
     self.screen.canvas = polygon.fill_poly(self.screen.canvas, self.edges,
-                                           self.colour, self.speed, self.extra_slowness)
+                                           self.colour, self.speed, self.slowness)
     
   def __fill_shape_flock(self):
     # point_generator = polygon.fill_poly_points(self.edges)
@@ -193,7 +194,7 @@ class Sparrow():
     
   def set_slowness(self, slowness):
     '''set the slowness of the sparrow'''
-    self.extra_slowness = slowness 
+    self.slowness = slowness 
 
   def set_speed(self, speed):
     self.speed = speed

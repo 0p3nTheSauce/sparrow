@@ -14,7 +14,8 @@ class Screen:
       cls._instance.height = height
       cls._instance.bg_color = bg_color
       cls._instance.colour = colour
-      cls._instance.slowness=0
+      cls._instance.speed = 100
+      cls._instance.slowness = 1
       # cls._instance.buffer = queue.Queue()
       cls._instance.point_buff = queue.Queue()
       cls._instance.poly_buff = queue.Queue()
@@ -23,8 +24,8 @@ class Screen:
         dtype=np.uint8) * np.array(bg_color, dtype=np.uint8)
     return cls._instance
   
-  def show(self,wait=1):
-    cv2.imshow("Sparrow Screen", self.canvas)
+  def show(self, wait):
+    cv2.imshow("Sparrow Screen", self.canvas)  
     key = cv2.waitKey(wait)
     if key == 27:
       cv2.destroyAllWindows()
@@ -56,41 +57,106 @@ class Screen:
       if cv2.waitKey(1) & 0xFF == ord('q'):
         break
   
-  def chunks_update(self, chunk_size=100):
-    while True:
-      chunk = []
-      for _ in range(chunk_size):
-        try:
-          data = self.point_buff.get_nowait()
-          x, y, colour = data          
-          if self.on_screen((x,y)):
-            chunk.append((x, y, colour))
-        except queue.Empty:
+  # def chunks_update(self, chunk_size=100):
+  #   while True:
+  #     chunk = []
+  #     for _ in range(chunk_size):
+  #       try:
+  #         data = self.point_buff.get_nowait()
+  #         x, y, colour = data          
+  #         if self.on_screen((x,y)):
+  #           chunk.append((x, y, colour))
+  #       except queue.Empty:
+  #         break
+  #     try:
+  #       poly = self.poly_buff.get_nowait()
+  #       self.canvas = polygon.fill_poly(self.canvas, poly.edges,
+  #                                       poly.colour)
+  #     except queue.Empty:
+  #       pass 
+  #     if not chunk:
+  #       break
+  #     x_coords = np.array([item[0] for item in chunk])
+  #     y_coords = np.array([item[1] for item in chunk])
+  #     colours = np.array([item[2] for item in chunk])
+  #     self.canvas[y_coords, x_coords] = colours
+  #     # self.canvas[y_coords, x_coords] = (0,0,0)
+  #     self.show()
+  
+  # def point_update(self):
+  #   for _ in range(self.speed):
+  #     try:
+  #       data = self.point_buff.get_nowait()
+  #       x, y, colour = data
+  #       if self.on_screen((x,y)):
+  #         self.canvas[y,x] = colour #TODO: This may be a slow approach
+  #     except queue.Empty:
+  #       self.show(self.slowness)
+  #       return True
+  #   self.show(self.slowness)
+  #   return False
+
+  def point_update(self):
+    working = True
+    while working:
+      for _ in range(self.speed):
+        if self.point_buff.empty():
+          self.show(self.slowness)
+          # working = False
           break
-      try:
-        poly = self.poly_buff.get_nowait()
-        self.canvas = polygon.fill_poly(self.canvas, poly.edges,
-                                        poly.colour)
-      except queue.Empty:
-        pass 
-      if not chunk:
+        data = self.point_buff.get_nowait()
+        x, y, colour = data
+        if self.on_screen((x,y)):
+          self.canvas[y,x] = colour
+      # self.show(self.slowness)
+      cv2.imshow("Sparrow Screen", self.canvas)
+      key = cv2.waitKey(self.slowness)
+      if key == 27:
         break
-      x_coords = np.array([item[0] for item in chunk])
-      y_coords = np.array([item[1] for item in chunk])
-      colours = np.array([item[2] for item in chunk])
-      self.canvas[y_coords, x_coords] = colours
-      # self.canvas[y_coords, x_coords] = (0,0,0)
-      self.show()
+    #TODO: 
+    '''
+    If you are picking this up in a few weeks, this is where we at:
+    This function technically works but is not very elegant, as it essentially 
+    loops through waitkey waiting for 1 ms.
+    
+    In mainloop the commented out code is what I would like to do, however,
+    this causes the program to stop prematurely. I believe this is because the screen
+    tries to get a new point faster that the sparrow can put them there, leading to 
+    the loop ending early. 
+    
+    Possible solutions:
+    - revert to old chunks_update function
+    - use lines instead of points (leads to same issue but might do this for other reasons)
+    - make sure mainloop can't finish until threads are finished (probably best)
+    '''
+
+  def polygon_update(self):
+    try:
+      poly = self.poly_buff.get_nowait()
+      self.canvas = polygon.fill_poly(self.canvas, poly.edges,
+                                      poly.colour, self.speed, self.slowness)
+    except queue.Empty:
+      return True
+    return False
   
-  def polygon_update(self, chunk_size=100):
-    pass
-  
-  
+  # def mainloop(self):
+  #   if self.flock:
+  #     # self.seq_update()
+  #     self.chunks_update()
+  #     self.show(0)
+  #   else: 
+  #     self.show(0)
+    
+    
   def mainloop(self):
     if self.flock:
-      # self.seq_update()
-      self.chunks_update()
-      self.show(0)
+      print(f"Point buff empty: {self.point_buff.empty()}")
+      self.point_update()
+      # while True:
+      #   if self.point_update() and self.polygon_update():
+      #     break
+      #   else:
+      #     self.show(self.slowness)
+      # self.show(0)
     else: 
       self.show(0)
-    
