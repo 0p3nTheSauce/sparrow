@@ -154,12 +154,7 @@ def cross_y_borders_right():
 
 
 def test_basic_shape(sparr):
-  # wn = Screen()
-  # rock = Sparrow()
-  # sparr.set_slowness(1)
   sparr.penup()
-  sparr.set_speed(0)
-  sparr.set_slowness(100)
   sparr.begin_fill()
   sparr.goto(-100,200)
   sparr.pendown()
@@ -167,10 +162,9 @@ def test_basic_shape(sparr):
   sparr.goto(90, 10)
   sparr.goto(100, 210)
   sparr.goto(-100,200)
-  sparr.set_speed(1000)
-  sparr.set_slowness(1)
+  sparr.set_speed(0)
+  sparr.set_slowness(2)
   sparr.end_fill()
-  # wn.mainloop()
   
 def test_basic_shape_serial():
   wn = Screen()

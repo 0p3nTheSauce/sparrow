@@ -197,21 +197,40 @@ def seperate_lines(sorted_by_y):
     seperated_by_line.append(line)
   return seperated_by_line  
   
-def fill_poly(screen, edges, colour=(0,0,0), slowness=0):
+def fill_poly(screen, edges, colour=(0,0,0), speed=100, slowness=0):
   # sorted_by_x = sorted(points, key=lambda x: x[0])
   all_points = [point for edge in edges for point in edge]
   rem_dup = remove_duplicate_points(all_points)
   sorted_by_y = sorted(rem_dup, key=lambda x: x[1])
   lines = seperate_lines(sorted_by_y)
+  count = 0
   for line in lines:
     fill_bounds = get_fill_boundaries(line, edges)
     if fill_bounds is not None:
       screen = fill_lines(fill_bounds, screen, colour)
-      if slowness >=1:
+      if count == speed:
         cv2.imshow('Sparrow Screen', screen)
         cv2.waitKey(slowness)
+        count = 0
+      else:
+        count += 1
   return screen
 
+
+# def fill_poly(screen, edges, colour=(0,0,0), slowness=0):
+#   # sorted_by_x = sorted(points, key=lambda x: x[0])
+#   all_points = [point for edge in edges for point in edge]
+#   rem_dup = remove_duplicate_points(all_points)
+#   sorted_by_y = sorted(rem_dup, key=lambda x: x[1])
+#   lines = seperate_lines(sorted_by_y)
+#   for line in lines:
+#     fill_bounds = get_fill_boundaries(line, edges)
+#     if fill_bounds is not None:
+#       screen = fill_lines(fill_bounds, screen, colour)
+#       if slowness >=1:
+#         cv2.imshow('Sparrow Screen', screen)
+#         cv2.waitKey(slowness)
+#   return screen
 
 def fill_poly_points(edges, colour=(0,0,0)):
   all_points = [point for edge in edges for point in edge]

@@ -98,7 +98,7 @@ class Sparrow():
   
   def __fill_shape(self):
     self.screen.canvas = polygon.fill_poly(self.screen.canvas, self.edges,
-                                           self.colour, self.slowness)
+                                           self.colour, self.speed, self.extra_slowness)
     
   def __fill_shape_flock(self):
     # point_generator = polygon.fill_poly_points(self.edges)
