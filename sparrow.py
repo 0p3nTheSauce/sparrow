@@ -148,11 +148,11 @@ class Sparrow():
 
   def flock(self):
     self.flocking=True
-    self.screen.flock_on()
+    self.screen.start_flock()
         
   def solo(self):
     self.flocking=False
-    self.screen.flock_off()
+    self.screen.solo()
   
   def begin_fill(self):
     '''To fill a polygon, use begin_fill, then draw the edges, and finally use end_fill'''

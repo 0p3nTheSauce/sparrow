@@ -176,8 +176,8 @@ def test_basic_shape_parallel():
   wn = Screen()
   rock = Sparrow()
   rock.flock()
-  run_parallel(test_basic_shape, rock)
-  wn.mainloop()
+  t1 = run_parallel(test_basic_shape, rock)
+  wn.mainloop(sparrows=[t1])
   
 def main():
   #test_parallel()

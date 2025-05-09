@@ -19,7 +19,8 @@ class Screen:
       # cls._instance.buffer = queue.Queue()
       cls._instance.point_buff = queue.Queue()
       cls._instance.poly_buff = queue.Queue()
-      cls._instance.flock=False
+      cls._instance.flocking=False
+      cls._instance.flock=[]
       cls._instance.canvas = np.ones((height, width, 3),
         dtype=np.uint8) * np.array(bg_color, dtype=np.uint8)
     return cls._instance
@@ -30,10 +31,10 @@ class Screen:
     if key == 27:
       cv2.destroyAllWindows()
       
-  def flock_on(self):
-    self.flock = True
+  def start_flock(self):
+    self.flocking = True
   
-  def flock_off(self):
+  def solo(self):
     self.flock = False
   
   def clear(self):
@@ -44,18 +45,18 @@ class Screen:
     x,y = new_coords    
     return 0 <= x < self.width and 0 <= y < self.height
   
-  def seq_update(self):
-    while True:
-      if not self.buffer.empty():
-        coord = self.buffer.get() #coord coming in screen coordinates
-        if coord is None:
-          break
-        x,y,colour = coord
-        if self.on_screen((x,y)):
-          self.canvas[y,x] = colour
-        self.show()
-      if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+  # def seq_update(self):
+  #   while True:
+  #     if not self.buffer.empty():
+  #       coord = self.buffer.get() #coord coming in screen coordinates
+  #       if coord is None:
+  #         break
+  #       x,y,colour = coord
+  #       if self.on_screen((x,y)):
+  #         self.canvas[y,x] = colour
+  #       self.show()
+  #     if cv2.waitKey(1) & 0xFF == ord('q'):
+  #       break
   
   # def chunks_update(self, chunk_size=100):
   #   while True:
@@ -82,54 +83,7 @@ class Screen:
   #     self.canvas[y_coords, x_coords] = colours
   #     # self.canvas[y_coords, x_coords] = (0,0,0)
   #     self.show()
-  
-  # def point_update(self):
-  #   for _ in range(self.speed):
-  #     try:
-  #       data = self.point_buff.get_nowait()
-  #       x, y, colour = data
-  #       if self.on_screen((x,y)):
-  #         self.canvas[y,x] = colour #TODO: This may be a slow approach
-  #     except queue.Empty:
-  #       self.show(self.slowness)
-  #       return True
-  #   self.show(self.slowness)
-  #   return False
-
-  def point_update(self):
-    working = True
-    while working:
-      for _ in range(self.speed):
-        if self.point_buff.empty():
-          self.show(self.slowness)
-          # working = False
-          break
-        data = self.point_buff.get_nowait()
-        x, y, colour = data
-        if self.on_screen((x,y)):
-          self.canvas[y,x] = colour
-      # self.show(self.slowness)
-      cv2.imshow("Sparrow Screen", self.canvas)
-      key = cv2.waitKey(self.slowness)
-      if key == 27:
-        break
-    #TODO: 
-    '''
-    If you are picking this up in a few weeks, this is where we at:
-    This function technically works but is not very elegant, as it essentially 
-    loops through waitkey waiting for 1 ms.
-    
-    In mainloop the commented out code is what I would like to do, however,
-    this causes the program to stop prematurely. I believe this is because the screen
-    tries to get a new point faster that the sparrow can put them there, leading to 
-    the loop ending early. 
-    
-    Possible solutions:
-    - revert to old chunks_update function
-    - use lines instead of points (leads to same issue but might do this for other reasons)
-    - make sure mainloop can't finish until threads are finished (probably best)
-    '''
-
+      
   def polygon_update(self):
     try:
       poly = self.poly_buff.get_nowait()
@@ -139,24 +93,37 @@ class Screen:
       return True
     return False
   
-  # def mainloop(self):
-  #   if self.flock:
-  #     # self.seq_update()
-  #     self.chunks_update()
-  #     self.show(0)
-  #   else: 
-  #     self.show(0)
-    
-    
-  def mainloop(self):
-    if self.flock:
-      print(f"Point buff empty: {self.point_buff.empty()}")
-      self.point_update()
-      # while True:
-      #   if self.point_update() and self.polygon_update():
-      #     break
-      #   else:
-      #     self.show(self.slowness)
-      # self.show(0)
+  def point_update(self):
+    chunk = []
+    finished = False
+    for _ in range(self.speed):
+      try:
+        point = self.point_buff.get_nowait()
+        x, y, colour = point
+        if self.on_screen((x,y)):
+          chunk.append((x,y,colour))
+      except queue.Empty:
+        finished = True
+        break
+    if len(chunk) != 0:
+      x_coords = np.array([item[0] for item in chunk])
+      y_coords = np.array([item[1] for item in chunk])
+      colours = np.array([item[2] for item in chunk])
+      self.canvas[y_coords, x_coords] = colours
+    return finished
+  
+  @staticmethod
+  def all_finished(sparrows):
+    return all(not sparr.is_alive() for sparr in sparrows)
+  
+  def mainloop(self, sparrows=[]):
+    if self.flocking:
+      # print(f"Point buff empty: {self.point_buff.empty()}")
+      while True:
+        if self.point_update() and self.polygon_update() and self.all_finished(sparrows):
+          break
+        else:
+          self.show(self.slowness)
+      self.show(0)
     else: 
       self.show(0)
