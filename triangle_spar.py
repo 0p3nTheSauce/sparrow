@@ -100,7 +100,8 @@ def mitopinski(sparr, triangle, depth=7):
   connect_pnts_with(sparr, xs, ys, fill)
   clutch = sparr.spawn(3)
   for i in range(3):
-    mitopinski(clutch[i], next[i], depth-1)
+    # mitopinski(clutch[i], next[i], depth-1)
+    clutch[i].fly_parallel(mitopinski, (next[i], depth-1))
     
 
 def connect_pnts_with(sparr, xs, ys, fill=False):
@@ -148,13 +149,14 @@ def testing(sparr, xs, ys):
 def main():
   bean = sparrow.Sparrow()
   # bean.speed(0)
+  bean.flock()
   wn = screen.Screen()
   
-  xs, ys = triangle(bean, 600)
+  first = triangle(bean, 600)
   # xs, ys, mxs, mys = triangle(bean, 400)
   
   #sierpinski([(xs, ys)])
-  mitopinski(bean, (xs, ys))
+  bean.fly_parallel(mitopinski, (first, 7))
   #testing(bean, xs, ys)
   
   # bean.hideturtle()

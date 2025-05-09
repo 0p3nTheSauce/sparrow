@@ -66,7 +66,7 @@ class Sparrow():
     thread.start()
     
   
-  def spawn(n):
+  def spawn(_, n):
     clutch = []
     for _ in range(n):
       spar = Sparrow()
