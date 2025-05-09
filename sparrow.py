@@ -23,18 +23,22 @@ def run_parallel(task,*args):
   thread.start()
   return thread
 
-# def update_screen(screen):
-#   """Continuously updates and displays the screen while threads are active."""
-#   while any(thread.is_alive() for thread in threading.enumerate() if thread != threading.main_thread()):
-#     screen.update()
-#     screen.show()
-#     time.sleep(0.001)  # More frequent updates
+# def fly_parallel(task,*args):
+#   '''send a sparrow off but screen must wait for it
+#     to finish its task'''
+#   sparr = args[0]
+#   thread = threading.Thread(target=task, args=args)
+#   thread.start()
+#   sparr = Sparrow()
+#   sparr.screen.put
 
-  # Final update and display
-  screen.update()
-  screen.show()
-  cv2.waitKey(0)
-  cv2.destroyAllWindows()
+# def spawn(n):
+#   clutch = []
+#   for _ in range(n):
+#     spar = Sparrow()
+#     spar.flock()
+#     clutch.append(spar)
+#   return clutch
 
 class Sparrow():
   def __init__(self):
@@ -52,7 +56,24 @@ class Sparrow():
     self.filling=False
     self.edges=[]#for filling polygons
     self.flocking=False
+  
+  def fly_parallel(self,task,args=()):
+    '''send a sparrow off but screen must wait for it
+    to finish its task'''
+    spargs = (self,) + args
+    thread = threading.Thread(target=task, args=spargs)
+    self.screen.flock.put(thread)
+    thread.start()
     
+  
+  def spawn(n):
+    clutch = []
+    for _ in range(n):
+      spar = Sparrow()
+      spar.flock()
+      clutch.append(spar)
+    return clutch
+  
   def clear(self):
     self.screen.clear()
     self.screen.show()

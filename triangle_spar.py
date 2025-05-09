@@ -2,6 +2,8 @@ import sparrow
 import math
 import screen
 
+
+
 def triangle(sparr, dist, centre=(0,0)):
   #adjust turtles position so triangle is centered
   sparr.penup()
@@ -86,10 +88,38 @@ def sierpinski(triangles, depth=7):
     connect_pnts(xs, ys, fill)
     sierpinski(next, depth-1)
 
+def mitopinski(sparr, triangle, depth=7):
+  fill = False
+  if depth < 1:
+    return
+  elif depth == 1:
+    fill = True
+  # for tr in triangles:
+  xs, ys = triangle
+  next = new_triangles(xs, ys)
+  connect_pnts_with(sparr, xs, ys, fill)
+  clutch = sparr.spawn(3)
+  for i in range(3):
+    mitopinski(clutch[i], next[i], depth-1)
+    
+
+def connect_pnts_with(sparr, xs, ys, fill=False):
+  if fill:
+    sparr.begin_fill()
+  sparr.penup()
+  sparr.goto(xs[0], ys[0])
+  sparr.pendown()
+  for i in range(len(xs)):
+    sparr.goto(xs[i], ys[i])
+  sparr.goto(xs[0], ys[0])
+  if fill:
+    sparr.end_fill()
+  
+
 def connect_pnts(xs, ys, fill=False):
   sparr = sparrow.Sparrow()
   if fill:
-    sparr.fillcolor("black")
+    # sparr.fillcolor("black")
     sparr.begin_fill()
   # sparr.speed(0)
   sparr.penup()
@@ -101,27 +131,18 @@ def connect_pnts(xs, ys, fill=False):
   if fill:
     sparr.end_fill()
   
-  sparr.hideturtle()
+  # sparr.hideturtle()
 
 def testing(sparr, xs, ys):
   bean = sparr
-  
   output(xs, ys)
-  
-  
   mxs, mys = midpoints(xs, ys)
-  
   connect_pnts(mxs, mys)
-  
   nmxs, nmys = midpoints(mxs, mys)
-  
   connect_pnts(nmxs, nmys)
-  
   #clear screen
   bean.clear()
-  
   draw_triangles(new_triangles(xs, ys))
-  
   output(mxs, mys)
 
 def main():
@@ -132,11 +153,11 @@ def main():
   xs, ys = triangle(bean, 600)
   # xs, ys, mxs, mys = triangle(bean, 400)
   
-  sierpinski([(xs, ys)])
-  
+  #sierpinski([(xs, ys)])
+  mitopinski(bean, (xs, ys))
   #testing(bean, xs, ys)
   
-  bean.hideturtle()
+  # bean.hideturtle()
   wn.mainloop()
     
 if __name__ == "__main__":

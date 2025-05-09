@@ -19,11 +19,12 @@ class Screen:
       # cls._instance.buffer = queue.Queue()
       cls._instance.point_buff = queue.Queue()
       cls._instance.poly_buff = queue.Queue()
+      cls._instance.flock = queue.Queue()
       cls._instance.flocking=False
-      cls._instance.flock=[]
       cls._instance.canvas = np.ones((height, width, 3),
         dtype=np.uint8) * np.array(bg_color, dtype=np.uint8)
     return cls._instance
+  
   
   def show(self, wait):
     cv2.imshow("Sparrow Screen", self.canvas)  
@@ -35,7 +36,7 @@ class Screen:
     self.flocking = True
   
   def solo(self):
-    self.flock = False
+    self.flocking = False
   
   def clear(self):
     self.canvas[:] = self.bg_color
@@ -112,15 +113,18 @@ class Screen:
       self.canvas[y_coords, x_coords] = colours
     return finished
   
-  @staticmethod
-  def all_finished(sparrows):
-    return all(not sparr.is_alive() for sparr in sparrows)
+  # @staticmethod
+  # def all_finished(sparrows):
+  #   return all(not sparr.is_alive() for sparr in sparrows)
   
-  def mainloop(self, sparrows=[]):
+  def all_finished(self):
+    current_flock = list(self.flock.queue)
+    return all(not sparr.is_alive() for sparr in current_flock)    
+  
+  def mainloop(self): 
     if self.flocking:
-      # print(f"Point buff empty: {self.point_buff.empty()}")
       while True:
-        if self.point_update() and self.polygon_update() and self.all_finished(sparrows):
+        if self.point_update() and self.polygon_update() and self.all_finished():
           break
         else:
           self.show(self.slowness)
