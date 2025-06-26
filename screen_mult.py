@@ -8,10 +8,10 @@ import polygon
 
 class Screen:
   def __init__(self, name='sky', width=2000
-    , height=2000, bg_color=(255, 255, 255)
-    , point_buff=None, poly_buff=None
-    , flock=None, canvas=None, speed = 100
-    , slowness = 1, flocking = False):
+      , height=2000, bg_color=(255, 255, 255)
+      , point_buff=None, poly_buff=None
+      , flock=None, canvas=None, speed = 100
+      , slowness = 1, flocking = False):
     self.name = name
     self.width = width
     self.height = height

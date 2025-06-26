@@ -40,7 +40,7 @@ def run_parallel(task,*args):
 #     clutch.append(spar)
 #   return clutch
 
-class Sparrow():
+class Sparrow:
   def __init__(self):
     self.screen = Screen()
     self.speed = 5 #make -1 for max speed
