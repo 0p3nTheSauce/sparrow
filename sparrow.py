@@ -135,8 +135,8 @@ class Sparrow:
     new_x = self.x + distance * np.cos(self.angle)
     new_y = self.y + distance * np.sin(self.angle)
     # new_x, new_y = self.__portal(new_x, new_y)  
-    self.x = new_x
-    self.y = new_y
+    # self.x = new_x
+    # self.y = new_y
     return (new_x, new_y)
     
   def forward(self, distance):
