@@ -7,11 +7,11 @@ import queue
 import polygon
 
 class Screen:
-  def __init__(self, name='sky', width=2000
-      , height=2000, bg_color=(255, 255, 255)
+  def __init__(self, name='sky', width=800
+      , height=800, bg_color=(255, 255, 255)
       , point_buff=None, poly_buff=None
       , flock=None, canvas=None, speed = 100
-      , slowness = 1, flocking = False):
+      , slowness = 1):
     self.name = name
     self.width = width
     self.height = height
@@ -35,7 +35,7 @@ class Screen:
       self.canvas = canvas
     self.speed = speed
     self.slowness = slowness
-    self.flocking = flocking
+
     
   def show(self, wait):
     cv2.imshow("Sparrow Screen", self.canvas)  
@@ -91,12 +91,11 @@ class Screen:
     return all(not sparr.is_alive() for sparr in self.flock)    
   
   def mainloop(self): 
-    if self.flocking:
-      while True:
-        if self.point_update() and self.polygon_update() and self.all_finished():
-          break
-        else:
-          self.show(self.slowness)
-      self.show(0)
-    else: 
-      self.show(0)
+    
+    while True:
+      if self.point_update() and self.polygon_update() and self.all_finished():
+        break
+      else:
+        self.show(self.slowness)
+    self.show(0)
+    

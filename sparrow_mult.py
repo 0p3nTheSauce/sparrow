@@ -16,7 +16,7 @@ def run_parallel(task, *args):
   return proc
 
 class Sparrow:
-  def __init__(self, poly_buff, point_buff, flock
+  def __init__(self, screen
       , name='rock'
       , speed=5, slowness=1, x=0, y=0
       , colour=(0,0,0), size=1, image='v^o>'
@@ -37,9 +37,10 @@ class Sparrow:
     self.portal = portal
     self.filling = filling
     self.edges = edges #for filling polygons
-    self.point_buff = point_buff
-    self.poly_buff = poly_buff
-    self.flock = flock
+    self.point_buff = screen.point_buff
+    self.poly_buff = screen.poly_buff
+    self.flock = screen.flock
+    
       
   def fly_parallel(self, task, args=()):
     spargs = (self,) + args
